@@ -1,0 +1,68 @@
+import { PROGRAM_LABELS, typeLabel, type Program } from "@/config/programs";
+import { formatDate } from "@/lib/enrollments";
+
+export type EnrollmentFactsInput = {
+  refId: string;
+  type: string;
+  program: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  participantName: string | null;
+  businessName: string | null;
+  contactName: string | null;
+  repNameRaw: string | null;
+  createdAt: Date;
+  rep: { name: string; email: string } | null;
+};
+
+/** The "who is this" block shared by the enrollee, rep and admin detail views. */
+export function EnrollmentFacts({ enrollment }: { enrollment: EnrollmentFactsInput }) {
+  const facts: Array<[string, React.ReactNode]> = [
+    ["Enrollment ID", <span className="font-mono">{enrollment.refId}</span>],
+    ["Enrollee type", typeLabel(enrollment.type)],
+    [
+      "Program",
+      PROGRAM_LABELS[enrollment.program as Program] ?? enrollment.program,
+    ],
+    ["Submitted", formatDate(enrollment.createdAt)],
+    ["Name", enrollment.name],
+    ["Email", enrollment.email],
+    ["Phone", enrollment.phone ?? "—"],
+  ];
+
+  if (enrollment.type === "EMPLOYEE") {
+    facts.push(["Works for participant", enrollment.participantName ?? "—"]);
+    facts.push([
+      "Assigned representative",
+      enrollment.rep ? (
+        <span>
+          {enrollment.rep.name}{" "}
+          <span className="text-slate-400">· {enrollment.rep.email}</span>
+        </span>
+      ) : enrollment.repNameRaw ? (
+        <span className="text-amber-700">
+          {enrollment.repNameRaw} — not yet linked
+        </span>
+      ) : (
+        <span className="text-slate-400">Unassigned</span>
+      ),
+    ]);
+  }
+
+  if (enrollment.type === "VENDOR") {
+    facts.push(["Business name", enrollment.businessName ?? "—"]);
+    facts.push(["Billing contact", enrollment.contactName ?? "—"]);
+  }
+
+  return (
+    <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+      {facts.map(([label, value]) => (
+        <div key={label}>
+          <dt className="text-xs uppercase tracking-wider text-slate-500">{label}</dt>
+          <dd className="mt-1 text-sm text-slate-900 break-words">{value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
