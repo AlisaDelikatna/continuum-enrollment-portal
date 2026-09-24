@@ -3,11 +3,20 @@ import type { RequiredDocument } from "./types";
 /**
  * Participant enrollment packet (new, or switching from another FMS).
  *
- * Source: Continuum agent call notes, Desiree and Shavauna, 1–22 Sep 2026.
+ * Sources:
+ *   - Continuum agent call notes, Desiree and Shavauna, 1–22 Sep 2026
+ *   - Shavauna Clark, "INTEREST IN CONTINUUM", 26 Aug 2026 (the package actually
+ *     sent to prospective reps)
+ *
+ * The Participant Enrollment Package is ONE PDF ("2025 participant packet.pdf")
+ * bundling all of the forms below, sent alongside a separate
+ * "SAMPLE FORMS (PARTICIPANT).pdf" of completed examples. The slots below break
+ * that bundle into its individual forms so an enrollee can return them piecemeal.
  *
  * About 97% of the packet is the participant's own information. The
- * representative completes only the fields labelled "representative" and signs
- * "in care of" the participant.
+ * representative completes only the fields labelled "representative". Where the
+ * participant cannot sign, the representative signs their own name in care of
+ * the participant ("Jane Doe in care of John Doe") on all forms.
  *
  * Deliberately NOT collected:
  *   - the general Power of Attorney — discarded; only the Limited POA is used
@@ -21,7 +30,7 @@ export const PARTICIPANT_DOCUMENTS: RequiredDocument[] = [
   {
     key: "participant-packet",
     label: "Participant Packet",
-    hint: "The representative fills only the fields labelled 'representative' and signs in care of the participant.",
+    hint: "Sent as a single PDF containing every form below. The representative fills only the fields labelled 'representative' and, where the participant cannot sign, signs their own name in care of the participant.",
     required: true,
   },
   {
@@ -52,14 +61,14 @@ export const PARTICIPANT_DOCUMENTS: RequiredDocument[] = [
   },
   {
     key: "training-certificate",
-    label: "Self-Directed Training Certificate",
-    hint: "Issued by DBHDD after roughly 4–5 hours of virtual training. A certificate from a previous year is not accepted — the representative must retake the training and complete the whole current packet.",
+    label: "Self-Directed Training Certificate (representative)",
+    hint: "The representative's certificate, sent with the paperwork. Issued by DBHDD after roughly 4–5 hours of virtual training. A certificate from a previous year is not accepted — the representative must retake the training and complete the whole current packet.",
     required: true,
   },
   {
     key: "rd-1061",
-    label: "RD 1061 with notarized page 2",
-    hint: "Good-to-serve requirement.",
+    label: "Form RD-1061 — notarized",
+    hint: "Good-to-serve requirement. Must be notarized; the call notes specify page 2 in particular.",
     required: true,
   },
   {

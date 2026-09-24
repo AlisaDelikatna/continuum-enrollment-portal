@@ -137,8 +137,15 @@ page button calls the latter; a cron job could call it just as easily.
 
 ## Required document lists
 
-One file per enrollee type, drawn from Continuum agent call notes (Desiree and
-Shavauna, 1–22 Sep 2026):
+One file per enrollee type. Sources: Continuum agent call notes (Desiree and
+Shavauna, 1–22 Sep 2026) and the packages Shavauna actually sends — "INTEREST IN
+CONTINUUM" (26 Aug 2026) and "GOOD TO SERVE for …" (30 Jul 2026).
+
+Continuum sends each packet as a **single bundled PDF** — `2025 participant
+packet.pdf`, `2026 EMPLOYEE PACKET.pdf` — with separate sample-form PDFs showing
+completed examples. The config breaks each bundle into its individual forms so
+an enrollee can return them piecemeal and staff can see exactly what is
+outstanding.
 
 ```
 src/config/documents/employee.ts
@@ -163,8 +170,9 @@ counts.
 
 | Item | Status |
 | ---- | ------ |
+| Whether a signed payroll schedule is collected back, or only sent out as reference | flagged `unconfirmed` — Continuum emails a pay schedule PDF to new employers |
 | IRS 2678 / 8821 as participant-employer with Continuum as designee | flagged `unconfirmed` in the config and tagged in the UI |
-| `enrollment@` vs `enrollments@continuumfs.com` | using `enrollment@` (the majority of calls); noted in `src/lib/email.ts` |
+| ~~`enrollment@` vs `enrollments@`~~ | **Resolved: `enrollments@continuumfs.com`** (plural), per the Continuum signature block in two of Shavauna's emails, 30 Jul and 26 Aug 2026 |
 | Fingerprint fee reimbursement — receipts to `invoices@`, ~10 business days by money order | not modelled; no reimbursement flow exists yet |
 | Program scope | the notes say Continuum serves COMP and NOW for participant direction, but ICWP, CCSP and SOURCE all appear elsewhere. All five are configured, per the original brief |
 | Portal URL in emails | `https://portal.continuumfs.com` is a **placeholder** — the real URL was never given |

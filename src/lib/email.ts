@@ -8,9 +8,9 @@ import { programList } from "./enrollments";
  * OutboxEmail table and rendered at /outbox so it can be shown live.
  */
 
-// Source calls mostly gave "enrollment@"; a single call said "enrollments@".
-// Using the majority spelling — worth confirming before this goes anywhere real.
-const ENROLLMENT_INBOX = "enrollment@continuumfs.com";
+// Confirmed against the Continuum signature block in two of Shavauna Clark's
+// emails (30 Jul and 26 Aug 2026): the enrollment inbox is PLURAL.
+const ENROLLMENT_INBOX = "enrollments@continuumfs.com";
 const PHONE = "678-974-7942";
 
 // PLACEHOLDER — the real portal URL was never given in the source notes.

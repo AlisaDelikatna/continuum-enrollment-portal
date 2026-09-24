@@ -3,11 +3,20 @@ import type { RequiredDocument } from "./types";
 /**
  * Employee (caregiver) enrollment packet.
  *
- * Source: Continuum agent call notes, Desiree and Shavauna, 1–22 Sep 2026.
+ * Sources:
+ *   - Continuum agent call notes, Desiree and Shavauna, 1–22 Sep 2026
+ *   - Shavauna Clark, "INTEREST IN CONTINUUM", 26 Aug 2026 (the package actually
+ *     sent to prospective reps, with the signing and copy rules)
+ *
+ * Continuum sends the whole packet as a single PDF ("2026 EMPLOYEE PACKET.pdf")
+ * with a separate "employee samples.pdf" showing completed examples. The slots
+ * below are the individual forms inside it, so an enrollee can return them
+ * piecemeal.
+ *
  * The two most common hold-ups are an I-9 the representative has not signed and
  * a missing relationship to the participant — both are called out in the hints.
  *
- * Completed packets go to enrollment@continuumfs.com (not to personal staff
+ * Completed packets go to enrollments@continuumfs.com (not to personal staff
  * addresses) and are processed first-in, first-out.
  */
 export const EMPLOYEE_DOCUMENTS: RequiredDocument[] = [
@@ -31,7 +40,7 @@ export const EMPLOYEE_DOCUMENTS: RequiredDocument[] = [
   {
     key: "form-i9",
     label: "Form I-9, signed by the representative",
-    hint: "The representative signs as the employer. An unsigned I-9 is the other most common reason a packet is held.",
+    hint: "Completed by the representative: the employee signs at the top, the representative at the bottom. An unsigned I-9 is the other most common reason a packet is held.",
     required: true,
   },
   {
@@ -49,17 +58,20 @@ export const EMPLOYEE_DOCUMENTS: RequiredDocument[] = [
   {
     key: "payroll-schedule",
     label: "Payroll Schedule",
-    hint: "Pay dates are the 15th and the last day of the month.",
+    hint: "Pay dates are the 15th and the last day of the month. Continuum also sends a pay schedule PDF as reference once the employer is set up — confirm whether a signed copy is collected back.",
     required: true,
+    unconfirmed: true,
   },
   {
     key: "cpr-first-aid",
     label: "CPR / First Aid Certification",
+    hint: "A copy of the certification must be submitted.",
     required: true,
   },
   {
     key: "two-forms-of-id",
-    label: "Two Forms of ID",
+    label: "Two Forms of ID — Driver's License and Social Security card",
+    hint: "A copy of both must be submitted.",
     required: true,
   },
   {
