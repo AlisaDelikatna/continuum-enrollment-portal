@@ -1,26 +1,85 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-brand-50: #eefbf7;
+  --color-brand-100: #d5f5eb;
+  --color-brand-200: #aee9da;
+  --color-brand-500: #14867a;
+  --color-brand-600: #0f6d64;
+  --color-brand-700: #0c564f;
+  --color-brand-800: #0a443f;
+  --color-brand-900: #07332f;
+
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f4f6f8;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl bg-white ring-1 ring-slate-200/80 shadow-sm;
+  }
+
+  .card-pad {
+    @apply p-5 sm:p-6;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-slate-700 mb-1.5;
+  }
+
+  .input {
+    @apply w-full rounded-lg border-0 bg-white px-3 py-2 text-sm text-slate-900
+      ring-1 ring-inset ring-slate-300 placeholder:text-slate-400
+      focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-500;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
+      text-sm font-semibold transition-colors disabled:opacity-50
+      disabled:cursor-not-allowed;
+  }
+
+  /* Tailwind v4 cannot @apply one custom component class inside another, so
+     each variant repeats the base declarations. */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
+      text-sm font-semibold transition-colors disabled:opacity-50
+      disabled:cursor-not-allowed bg-brand-600 text-white hover:bg-brand-700;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
+      text-sm font-semibold transition-colors disabled:opacity-50
+      disabled:cursor-not-allowed bg-white text-slate-700 ring-1 ring-inset
+      ring-slate-300 hover:bg-slate-50;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2
+      text-sm font-semibold transition-colors disabled:opacity-50
+      disabled:cursor-not-allowed text-slate-600 hover:bg-slate-100;
+  }
+
+  .section-title {
+    @apply text-xs font-semibold uppercase tracking-wider text-slate-500;
+  }
+
+  .table-head {
+    @apply px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500;
+  }
+
+  .table-cell {
+    @apply px-4 py-3 text-sm text-slate-700 align-middle;
+  }
 }
