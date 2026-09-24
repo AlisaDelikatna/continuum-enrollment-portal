@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { allDocumentsFor, documentLabel, OTHER_DOCUMENT } from "@/config/documents";
+import { REQUIRE_COMPLETE_ENROLLMENT_FORM } from "@/config/demo";
 import { ENROLLEE_TYPES, PROGRAMS, type EnrolleeType } from "@/config/programs";
 import { isStatus, statusLabel } from "@/config/statuses";
 import { prisma } from "./db";
@@ -54,18 +55,32 @@ export type CreatedEnrollment = {
   programs: string[];
 };
 
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
 export async function createEnrollment(input: EnrollmentInput): Promise<CreatedEnrollment> {
   const type = input.type as EnrolleeType;
   if (!ENROLLEE_TYPES.includes(type)) throw new Error("Unknown enrollee type.");
+
   const programs = Array.from(new Set(input.programs ?? [])).filter((program) =>
     (PROGRAMS as readonly string[]).includes(program),
   );
-  if (programs.length === 0) throw new Error("Pick at least one waiver program.");
 
-  const name = input.name.trim();
-  const email = input.email.trim().toLowerCase();
-  if (!name) throw new Error("Name is required.");
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error("Enter a valid email address.");
+  // refId is needed up front so a blank email can be backfilled from it.
+  const refId = await nextRefId(type);
+
+  let name = input.name.trim();
+  let email = input.email.trim().toLowerCase();
+
+  if (REQUIRE_COMPLETE_ENROLLMENT_FORM) {
+    if (programs.length === 0) throw new Error("Pick at least one waiver program.");
+    if (!name) throw new Error("Name is required.");
+    if (!EMAIL_RE.test(email)) throw new Error("Enter a valid email address.");
+  } else {
+    // Demo mode: never block the walkthrough. Blanks become obvious
+    // placeholders rather than errors, and an enrollment may carry no program.
+    if (!name) name = `Unnamed enrollee (${refId})`;
+    if (!EMAIL_RE.test(email)) email = `${refId.toLowerCase()}@placeholder.invalid`;
+  }
 
   // Reuse the User row if this email already exists so the role switcher and
   // /me stay coherent; otherwise create the enrollee identity.
@@ -80,8 +95,6 @@ export async function createEnrollment(input: EnrollmentInput): Promise<CreatedE
   const existingRep = repEmail
     ? await prisma.user.findFirst({ where: { email: repEmail, role: "REP" }, select: { id: true } })
     : null;
-
-  const refId = await nextRefId(type);
 
   const enrollment = await prisma.enrollment.create({
     data: {

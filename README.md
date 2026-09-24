@@ -228,6 +228,17 @@ The outbox is the system-wide notification log — it holds every enrollee's nam
 address and status notes — so it is admin-only. A rep must not read participant
 or vendor correspondence.
 
+## Demo switches
+
+`src/config/demo.ts`:
+
+- `REQUIRE_COMPLETE_ENROLLMENT_FORM` — **false**. The public enrollment form
+  blocks nothing, so a walkthrough can click straight through an empty form.
+  A blank name becomes `Unnamed enrollee (CFS-EMP-0013)`, a blank or malformed
+  email becomes `cfs-emp-0013@placeholder.invalid`, and an enrollment may carry
+  no waiver program at all. Flip to `true` to restore normal validation (name,
+  a valid email, and at least one program).
+
 ## Known shortcuts (deliberate, for the demo)
 
 - No authentication. The role switcher is the login, and any visitor can pick

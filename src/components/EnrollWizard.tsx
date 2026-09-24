@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { REQUIRE_COMPLETE_ENROLLMENT_FORM } from "@/config/demo";
 import { documentsFor, OTHER_DOCUMENT } from "@/config/documents";
 import {
   EMPLOYEE_VS_VENDOR,
@@ -131,7 +132,7 @@ export function EnrollWizard() {
               event.preventDefault();
               const data = new FormData(event.currentTarget);
               setError(null);
-              if (programs.length === 0) {
+              if (REQUIRE_COMPLETE_ENROLLMENT_FORM && programs.length === 0) {
                 setError("Select at least one waiver program.");
                 return;
               }
@@ -166,14 +167,14 @@ export function EnrollWizard() {
               <Field
                 label={type === "VENDOR" ? "Primary contact name" : "Full name"}
                 name="name"
-                required
+                required={REQUIRE_COMPLETE_ENROLLMENT_FORM}
                 placeholder={type === "VENDOR" ? "Dana Whitfield" : "Jordan Ellis"}
               />
               <Field
                 label="Email"
                 name="email"
-                type="email"
-                required
+                type={REQUIRE_COMPLETE_ENROLLMENT_FORM ? "email" : "text"}
+                required={REQUIRE_COMPLETE_ENROLLMENT_FORM}
                 placeholder="name@example.com"
               />
               <Field label="Phone" name="phone" placeholder="(404) 555-0143" />
@@ -181,7 +182,8 @@ export function EnrollWizard() {
 
             <fieldset>
               <legend className="label">
-                Waiver programs <span className="text-rose-600">*</span>
+                Waiver programs
+                {REQUIRE_COMPLETE_ENROLLMENT_FORM && <span className="text-rose-600"> *</span>}
                 <span className="ml-1 font-normal text-slate-400">
                   select every program that applies
                 </span>
@@ -249,7 +251,7 @@ export function EnrollWizard() {
                   <Field
                     label="Representative email"
                     name="repEmail"
-                    type="email"
+                    type={REQUIRE_COMPLETE_ENROLLMENT_FORM ? "email" : "text"}
                     optional
                     placeholder="rep@example.com"
                   />
@@ -272,7 +274,7 @@ export function EnrollWizard() {
                   <Field
                     label="Legal business name"
                     name="businessName"
-                    required
+                    required={REQUIRE_COMPLETE_ENROLLMENT_FORM}
                     placeholder="Peachtree Mobility Supply LLC"
                   />
                   <Field
@@ -289,7 +291,9 @@ export function EnrollWizard() {
                 {pending ? "Submitting…" : "Continue to documents"}
               </button>
               <span className="text-xs text-slate-500">
-                Fields marked * are required.
+                {REQUIRE_COMPLETE_ENROLLMENT_FORM
+                  ? "Fields marked * are required."
+                  : "Demo mode: nothing is required — anything left blank is filled with a placeholder."}
               </span>
             </div>
           </form>
