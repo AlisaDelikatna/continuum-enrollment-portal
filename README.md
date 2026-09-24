@@ -160,8 +160,8 @@ already uploaded under the old key, so prefer adding a new entry.
 counts.
 
 - `programs` limits a requirement to particular waivers. The TB test and
-  physical is `["ICWP"]`, so an ICWP employee is asked for 11 documents and a
-  COMP employee for 10.
+  physical is `["ICWP"]`, so an ICWP employee is asked for 12 documents and a
+  COMP employee for 11.
 - `unconfirmed: true` marks a requirement that came from only a few source calls.
   It renders an amber **Unconfirmed** tag on the checklist. IRS 2678 and 8821
   currently carry it — confirm with a supervisor and clear the flag.

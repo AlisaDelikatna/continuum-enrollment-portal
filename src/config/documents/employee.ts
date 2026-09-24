@@ -68,10 +68,18 @@ export const EMPLOYEE_DOCUMENTS: RequiredDocument[] = [
     hint: "A copy of the certification must be submitted.",
     required: true,
   },
+  // Two forms of ID, tracked as separate slots so staff can see which one of
+  // the two is outstanding rather than a packet-level "not received".
   {
-    key: "two-forms-of-id",
-    label: "Two Forms of ID — Driver's License and Social Security card",
-    hint: "A copy of both must be submitted.",
+    key: "drivers-license",
+    label: "Driver's License",
+    hint: "A copy. First of the two required forms of ID.",
+    required: true,
+  },
+  {
+    key: "social-security-card",
+    label: "Social Security Card",
+    hint: "A copy. Second of the two required forms of ID.",
     required: true,
   },
   {
