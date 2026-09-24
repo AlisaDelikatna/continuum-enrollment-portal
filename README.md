@@ -142,10 +142,20 @@ Shavauna, 1–22 Sep 2026) and the packages Shavauna actually sends — "INTERES
 CONTINUUM" (26 Aug 2026) and "GOOD TO SERVE for …" (30 Jul 2026).
 
 Continuum sends each packet as a **single bundled PDF** — `2025 participant
-packet.pdf`, `2026 EMPLOYEE PACKET.pdf` — with separate sample-form PDFs showing
-completed examples. The config breaks each bundle into its individual forms so
-an enrollee can return them piecemeal and staff can see exactly what is
-outstanding.
+packet.pdf` (25 pages), `2026 EMPLOYEE PACKET.pdf` (17 pages) — with separate
+sample-form PDFs showing completed examples. The config breaks each bundle into
+its individual forms so an enrollee can return them piecemeal and staff can see
+exactly what is outstanding.
+
+The participant list is taken from the **Fiscal Employer Agent Participant
+Enrollment Checklist** on page 4 of the packet, which is authoritative. Forms the
+checklist marks "Supplemental — keep for future use" are deliberately *not*
+collected: Payroll Calendar, Online Time Sheet Instructions, Information Update
+Form, Rate Sheet, Termination Form, Separation Notice, What It Costs You.
+
+The employee packet is 17 scanned pages with no extractable text, so the employee
+list still comes from the call notes and Shavauna's emails rather than from the
+form itself. It needs OCR or a manual read to confirm.
 
 ```
 src/config/documents/employee.ts
@@ -161,7 +171,8 @@ counts.
 
 - `programs` limits a requirement to particular waivers. The TB test and
   physical is `["ICWP"]`, so an ICWP employee is asked for 12 documents and a
-  COMP employee for 11.
+  COMP employee for 11. The CCSP Cost Share Payment Agreement is `["CCSP"]`,
+  so a CCSP participant is asked for 13 and a COMP participant for 12.
 - `unconfirmed: true` marks a requirement that came from only a few source calls.
   It renders an amber **Unconfirmed** tag on the checklist. IRS 2678 and 8821
   currently carry it — confirm with a supervisor and clear the flag.
@@ -171,10 +182,11 @@ counts.
 | Item | Status |
 | ---- | ------ |
 | Whether a signed payroll schedule is collected back, or only sent out as reference | flagged `unconfirmed` — Continuum emails a pay schedule PDF to new employers |
-| IRS 2678 / 8821 as participant-employer with Continuum as designee | flagged `unconfirmed` in the config and tagged in the UI |
+| Is the general Power of Attorney submitted? | The packet checklist lists it; the agent call notes say discard it. Kept as required and flagged `unconfirmed` |
+| Who completes the DOL Employer Status Report? | On the packet checklist as a submitted form; the call notes say Continuum handles DOL registration. Kept and flagged `unconfirmed` |
 | ~~`enrollment@` vs `enrollments@`~~ | **Resolved: `enrollments@continuumfs.com`** (plural), per the Continuum signature block in two of Shavauna's emails, 30 Jul and 26 Aug 2026 |
 | Fingerprint fee reimbursement — receipts to `invoices@`, ~10 business days by money order | not modelled; no reimbursement flow exists yet |
-| Program scope | the notes say Continuum serves COMP and NOW for participant direction, but ICWP, CCSP and SOURCE all appear elsewhere. All five are configured, per the original brief |
+| ~~Program scope~~ | **Resolved: all five.** The Participant/Representative Agreement offers COMP, NOW, CCSP, ICWP and SOURCE as checkboxes, and the Employee Rate Form lists a SOURCE service line |
 | Portal URL in emails | `https://portal.continuumfs.com` is a **placeholder** — the real URL was never given |
 
 Not modelled at all: the Checkpoint fingerprint flow and the Good to Go email,
