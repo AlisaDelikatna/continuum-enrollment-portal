@@ -1,0 +1,132 @@
+// Continuum Fiscal Services — enrollment portal (demo)
+// SQLite has no native enums, so enum-like columns are Strings backed by
+// TypeScript unions in src/config/*. Keep them in sync.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+/// Everyone who can act in the portal: admin staff, reps, and enrollees.
+/// The header role switcher just picks one of these rows.
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  /// ADMIN | REP | ENROLLEE
+  role      String
+  createdAt DateTime @default(now())
+
+  /// Enrollment records this user owns (an enrollee has exactly one).
+  enrollments     Enrollment[] @relation("EnrolleeOf")
+  /// Enrollments this user is the assigned rep for.
+  repEnrollments  Enrollment[] @relation("RepOf")
+  statusEvents    StatusEvent[]
+  uploadedDocs    Document[]
+
+  @@index([role])
+}
+
+model Enrollment {
+  /// Human-readable enrollment ID shown on the confirmation screen, e.g. CFS-EMP-0142.
+  refId       String   @unique
+  id          String   @id @default(cuid())
+  /// EMPLOYEE | VENDOR | PARTICIPANT
+  type        String
+  /// COMP | NOW | CCSP | SOURCE | ICWP
+  program     String
+  /// RECEIVED | ACKNOWLEDGED | IN_REVIEW | MISSING_INFO | PROCESSED | ACTIVE
+  status      String   @default("RECEIVED")
+
+  // Common contact fields captured on every form.
+  name        String
+  email       String
+  phone       String?
+
+  // Employee-specific
+  participantName String?
+  /// Rep name/email as typed on the public form (before an admin assigns a real rep).
+  repNameRaw      String?
+  repEmailRaw     String?
+
+  // Vendor-specific
+  businessName String?
+  contactName  String?
+
+  enrolleeId String?
+  enrollee   User?   @relation("EnrolleeOf", fields: [enrolleeId], references: [id])
+
+  repId String?
+  rep   User?   @relation("RepOf", fields: [repId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  statusEvents StatusEvent[]
+  documents    Document[]
+
+  @@index([type])
+  @@index([status])
+  @@index([program])
+  @@index([repId])
+}
+
+/// One row per status transition. The enrollment dashboard reads these, so
+/// every row keeps its own timestamp, actor and note — nothing is overwritten.
+model StatusEvent {
+  id           String   @id @default(cuid())
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  status    String
+  note      String?
+  changedById String?
+  changedBy   User?   @relation(fields: [changedById], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([enrollmentId, createdAt])
+  @@index([status, createdAt])
+  @@index([createdAt])
+}
+
+model Document {
+  id           String   @id @default(cuid())
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  /// Slot from the per-type required-document config, or "other".
+  docKey       String
+  /// Display label for the slot ("Signed W-4", etc.).
+  label        String
+  originalName String
+  storedName   String
+  mimeType     String
+  size         Int
+
+  uploadedById String?
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@index([enrollmentId])
+  @@index([createdAt])
+}
+
+/// Every email the system would have sent. Nothing leaves the machine.
+model OutboxEmail {
+  id        String   @id @default(cuid())
+  to        String
+  subject   String
+  body      String
+  /// STATUS_CHANGE | UPLOAD_DIGEST | ENROLLMENT_RECEIVED
+  kind      String
+  /// Optional pointer back to the enrollment for context in the outbox list.
+  enrollmentRef String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

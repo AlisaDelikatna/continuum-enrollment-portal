@@ -1,0 +1,276 @@
+import { statusLabel } from "../config/statuses";
+import { typeLabel } from "../config/programs";
+import { prisma } from "./db";
+
+/**
+ * Nothing here talks to an SMTP server. Every message is written to the
+ * OutboxEmail table and rendered at /outbox so it can be shown live.
+ */
+
+const FROM = "Continuum Fiscal Services <enrollment@continuumfiscal.example>";
+const PORTAL_URL = "https://portal.continuumfiscal.example";
+
+type QueueArgs = {
+  to: string[];
+  subject: string;
+  body: string;
+  kind: "STATUS_CHANGE" | "UPLOAD_DIGEST" | "ENROLLMENT_RECEIVED";
+  enrollmentRef?: string | null;
+};
+
+async function queue({ to, subject, body, kind, enrollmentRef }: QueueArgs) {
+  const recipients = to.filter(Boolean);
+  if (recipients.length === 0) return null;
+  return prisma.outboxEmail.create({
+    data: {
+      to: recipients.join(", "),
+      subject,
+      body,
+      kind,
+      enrollmentRef: enrollmentRef ?? null,
+    },
+  });
+}
+
+function signature() {
+  return [
+    "",
+    "— Continuum Fiscal Services",
+    "Enrollment Team · (Demo environment — no real email was sent)",
+    FROM,
+  ].join("\n");
+}
+
+type EnrollmentForEmail = {
+  id: string;
+  refId: string;
+  type: string;
+  name: string;
+  email: string;
+  program: string;
+  repEmailRaw: string | null;
+  rep: { name: string; email: string } | null;
+};
+
+async function loadEnrollment(enrollmentId: string) {
+  return prisma.enrollment.findUnique({
+    where: { id: enrollmentId },
+    select: {
+      id: true,
+      refId: true,
+      type: true,
+      name: true,
+      email: true,
+      program: true,
+      repEmailRaw: true,
+      rep: { select: { name: true, email: true } },
+    },
+  });
+}
+
+/**
+ * Who hears about a status change:
+ *   EMPLOYEE  -> the employee AND their assigned rep
+ *   VENDOR    -> the vendor
+ *   PARTICIPANT -> the participant
+ * If an employee has no assigned rep yet, we fall back to the rep email typed
+ * on the enrollment form so the notification still lands somewhere.
+ */
+export function statusRecipients(enrollment: EnrollmentForEmail): string[] {
+  if (enrollment.type !== "EMPLOYEE") return [enrollment.email];
+  const repEmail = enrollment.rep?.email ?? enrollment.repEmailRaw ?? null;
+  return repEmail ? [enrollment.email, repEmail] : [enrollment.email];
+}
+
+export async function sendStatusChangeEmail(opts: {
+  enrollmentId: string;
+  status: string;
+  note?: string | null;
+  changedByName?: string | null;
+}) {
+  const enrollment = await loadEnrollment(opts.enrollmentId);
+  if (!enrollment) return null;
+
+  const label = statusLabel(opts.status);
+  const lines = [
+    `Hello ${enrollment.name},`,
+    "",
+    `The status of enrollment ${enrollment.refId} (${typeLabel(
+      enrollment.type,
+    )} · ${enrollment.program} waiver) is now: ${label}.`,
+  ];
+
+  if (opts.status === "MISSING_INFO") {
+    lines.push(
+      "",
+      "WHAT WE STILL NEED:",
+      opts.note?.trim() || "See your status page for details.",
+      "",
+      "Your enrollment stays on hold until these items are received.",
+    );
+  } else if (opts.note?.trim()) {
+    lines.push("", `Note from our team: ${opts.note.trim()}`);
+  }
+
+  if (enrollment.type === "EMPLOYEE") {
+    const repName = enrollment.rep?.name ?? enrollment.repEmailRaw;
+    if (repName) lines.push("", `Your representative ${repName} was copied on this message.`);
+  }
+
+  lines.push("", `View status: ${PORTAL_URL}/me`, ...(opts.changedByName ? [`Updated by: ${opts.changedByName}`] : []), signature());
+
+  return queue({
+    to: statusRecipients(enrollment),
+    subject: `[${enrollment.refId}] Enrollment status: ${label}`,
+    body: lines.join("\n"),
+    kind: "STATUS_CHANGE",
+    enrollmentRef: enrollment.refId,
+  });
+}
+
+export async function sendEnrollmentReceivedEmail(enrollmentId: string) {
+  const enrollment = await loadEnrollment(enrollmentId);
+  if (!enrollment) return null;
+
+  const body = [
+    `Hello ${enrollment.name},`,
+    "",
+    `We received your ${typeLabel(enrollment.type).toLowerCase()} enrollment for the ${
+      enrollment.program
+    } waiver program.`,
+    "",
+    `Enrollment ID: ${enrollment.refId}`,
+    `Current status: ${statusLabel("RECEIVED")}`,
+    "",
+    "Our enrollment team reviews new packets in the order received. You can upload any remaining documents at any time from your status page.",
+    "",
+    `Status page: ${PORTAL_URL}/me`,
+    signature(),
+  ].join("\n");
+
+  return queue({
+    to: statusRecipients(enrollment),
+    subject: `[${enrollment.refId}] We received your enrollment`,
+    body,
+    kind: "ENROLLMENT_RECEIVED",
+    enrollmentRef: enrollment.refId,
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Daily upload digest                                                 */
+/* ------------------------------------------------------------------ */
+
+export function dayBounds(date: Date) {
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return { start, end };
+}
+
+export type DigestRow = {
+  enrollee: string;
+  refId: string;
+  type: string;
+  document: string;
+  fileName: string;
+  uploadedBy: string;
+  at: Date;
+};
+
+export type Digest = {
+  date: Date;
+  rows: DigestRow[];
+  to: string[];
+  subject: string;
+  body: string;
+};
+
+/**
+ * Builds — but does not send — the admin digest for a single calendar day.
+ * Exported on its own so a future cron job can reuse it.
+ */
+export async function buildDailyDigest(date: Date): Promise<Digest> {
+  const { start, end } = dayBounds(date);
+
+  const [docs, admins] = await Promise.all([
+    prisma.document.findMany({
+      where: { createdAt: { gte: start, lt: end } },
+      orderBy: { createdAt: "asc" },
+      select: {
+        label: true,
+        originalName: true,
+        createdAt: true,
+        uploadedBy: { select: { name: true, role: true } },
+        enrollment: { select: { name: true, refId: true, type: true } },
+      },
+    }),
+    prisma.user.findMany({ where: { role: "ADMIN" }, select: { email: true } }),
+  ]);
+
+  const rows: DigestRow[] = docs.map((d) => ({
+    enrollee: d.enrollment.name,
+    refId: d.enrollment.refId,
+    type: typeLabel(d.enrollment.type),
+    document: d.label,
+    fileName: d.originalName,
+    uploadedBy: d.uploadedBy
+      ? `${d.uploadedBy.name} (${d.uploadedBy.role.toLowerCase()})`
+      : "Unknown",
+    at: d.createdAt,
+  }));
+
+  const dateLabel = start.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const bodyLines = [
+    `Daily document upload digest — ${dateLabel}`,
+    "",
+    rows.length === 0
+      ? "No documents were uploaded on this date."
+      : `${rows.length} document${rows.length === 1 ? "" : "s"} uploaded:`,
+  ];
+
+  for (const row of rows) {
+    bodyLines.push(
+      "",
+      `• ${row.enrollee} (${row.refId} · ${row.type})`,
+      `    Document:    ${row.document}`,
+      `    File:        ${row.fileName}`,
+      `    Uploaded by: ${row.uploadedBy}`,
+      `    Time:        ${row.at.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      })}`,
+    );
+  }
+
+  bodyLines.push("", `Review queue: ${PORTAL_URL}/admin`, signature());
+
+  return {
+    date: start,
+    rows,
+    to: admins.map((a) => a.email),
+    subject: `Daily upload digest — ${start.toLocaleDateString("en-US")} (${rows.length} upload${
+      rows.length === 1 ? "" : "s"
+    })`,
+    body: bodyLines.join("\n"),
+  };
+}
+
+/** Builds the digest for `date` and drops it in the outbox. */
+export async function sendDailyDigest(date: Date) {
+  const digest = await buildDailyDigest(date);
+  const email = await queue({
+    to: digest.to,
+    subject: digest.subject,
+    body: digest.body,
+    kind: "UPLOAD_DIGEST",
+  });
+  return { digest, email };
+}
