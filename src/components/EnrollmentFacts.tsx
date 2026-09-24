@@ -19,7 +19,7 @@ export type EnrollmentFactsInput = {
 /** The "who is this" block shared by the enrollee, rep and admin detail views. */
 export function EnrollmentFacts({ enrollment }: { enrollment: EnrollmentFactsInput }) {
   const facts: Array<[string, React.ReactNode]> = [
-    ["Enrollment ID", <span className="font-mono">{enrollment.refId}</span>],
+    ["Enrollment ID", <span key="refId" className="font-mono">{enrollment.refId}</span>],
     ["Enrollee type", typeLabel(enrollment.type)],
     [
       "Program",
@@ -36,16 +36,16 @@ export function EnrollmentFacts({ enrollment }: { enrollment: EnrollmentFactsInp
     facts.push([
       "Assigned representative",
       enrollment.rep ? (
-        <span>
+        <span key="rep">
           {enrollment.rep.name}{" "}
           <span className="text-slate-400">· {enrollment.rep.email}</span>
         </span>
       ) : enrollment.repNameRaw ? (
-        <span className="text-amber-700">
+        <span key="rep-raw" className="text-amber-700">
           {enrollment.repNameRaw} — not yet linked
         </span>
       ) : (
-        <span className="text-slate-400">Unassigned</span>
+        <span key="rep-none" className="text-slate-400">Unassigned</span>
       ),
     ]);
   }
