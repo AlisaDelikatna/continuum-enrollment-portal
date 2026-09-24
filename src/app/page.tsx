@@ -4,7 +4,7 @@ import { documentsFor } from "@/config/documents";
 import { ENROLLEE_TYPES, TYPE_BLURBS, TYPE_LABELS } from "@/config/programs";
 import { STATUSES, statusLabel } from "@/config/statuses";
 import { prisma } from "@/lib/db";
-import { documentProgress, formatDate, programList } from "@/lib/enrollments";
+import { documentProgress, formatDate, programCodes, programList } from "@/lib/enrollments";
 import { getActingUser, type ActingUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -158,6 +158,7 @@ async function EnrolleeLanding({ actor }: { actor: ActingUser }) {
           const progress = documentProgress(
             enrollment.type,
             enrollment.documents.map((d) => d.docKey),
+            programCodes(enrollment),
           );
           return (
             <Link

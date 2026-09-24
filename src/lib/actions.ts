@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { documentLabel, documentsFor, OTHER_DOCUMENT } from "@/config/documents";
+import { allDocumentsFor, documentLabel, OTHER_DOCUMENT } from "@/config/documents";
 import { ENROLLEE_TYPES, PROGRAMS, type EnrolleeType } from "@/config/programs";
 import { isStatus, statusLabel } from "@/config/statuses";
 import { prisma } from "./db";
@@ -38,6 +38,7 @@ export type EnrollmentInput = {
   email: string;
   phone?: string;
   participantName?: string;
+  relationship?: string;
   repName?: string;
   repEmail?: string;
   businessName?: string;
@@ -49,6 +50,8 @@ export type CreatedEnrollment = {
   refId: string;
   status: string;
   type: string;
+  /** Program codes, so step 3 can ask for the right waiver-specific documents. */
+  programs: string[];
 };
 
 export async function createEnrollment(input: EnrollmentInput): Promise<CreatedEnrollment> {
@@ -90,6 +93,7 @@ export async function createEnrollment(input: EnrollmentInput): Promise<CreatedE
       email,
       phone: input.phone?.trim() || null,
       participantName: type === "EMPLOYEE" ? input.participantName?.trim() || null : null,
+      relationship: type === "EMPLOYEE" ? input.relationship?.trim() || null : null,
       repNameRaw: type === "EMPLOYEE" ? input.repName?.trim() || null : null,
       repEmailRaw: type === "EMPLOYEE" ? repEmail : null,
       businessName: type === "VENDOR" ? input.businessName?.trim() || null : null,
@@ -114,7 +118,7 @@ export async function createEnrollment(input: EnrollmentInput): Promise<CreatedE
   store.set(ACTING_USER_COOKIE, enrollee.id, { path: "/", httpOnly: false, sameSite: "lax" });
 
   revalidatePath("/", "layout");
-  return enrollment;
+  return { ...enrollment, programs };
 }
 
 /* ---------------------------------------------------------------- */
@@ -184,7 +188,10 @@ export async function uploadDocuments(
     return { ok: false, uploaded: 0, message: "Choose at least one file first." };
   }
 
-  const known = new Set([...documentsFor(enrollment.type).map((d) => d.key), OTHER_DOCUMENT.key]);
+  const known = new Set([
+    ...allDocumentsFor(enrollment.type).map((d) => d.key),
+    OTHER_DOCUMENT.key,
+  ]);
 
   for (const { docKey, file } of pairs) {
     const key = known.has(docKey) ? docKey : OTHER_DOCUMENT.key;

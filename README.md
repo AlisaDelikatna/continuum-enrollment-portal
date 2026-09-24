@@ -135,9 +135,10 @@ page button calls the latter; a cron job could call it just as easily.
 
 ---
 
-## Editing the required document lists
+## Required document lists
 
-One file per enrollee type, all placeholders, all safe to edit:
+One file per enrollee type, drawn from Continuum agent call notes (Desiree and
+Shavauna, 1–22 Sep 2026):
 
 ```
 src/config/documents/employee.ts
@@ -145,12 +146,37 @@ src/config/documents/vendor.ts
 src/config/documents/participant.ts
 ```
 
-Each entry is `{ key, label, hint?, required }`. Renaming a `label` is safe at
-any time. Changing a `key` orphans documents already uploaded under the old key,
-so prefer adding a new entry. `required: false` entries are excluded from the
-"n of m required received" counts.
+Each entry is `{ key, label, hint?, required, programs?, unconfirmed? }`.
+Renaming a `label` is safe at any time. Changing a `key` orphans documents
+already uploaded under the old key, so prefer adding a new entry.
+`required: false` entries are excluded from the "n of m required received"
+counts.
+
+- `programs` limits a requirement to particular waivers. The TB test and
+  physical is `["ICWP"]`, so an ICWP employee is asked for 11 documents and a
+  COMP employee for 10.
+- `unconfirmed: true` marks a requirement that came from only a few source calls.
+  It renders an amber **Unconfirmed** tag on the checklist. IRS 2678 and 8821
+  currently carry it — confirm with a supervisor and clear the flag.
+
+### Open questions in the source notes
+
+| Item | Status |
+| ---- | ------ |
+| IRS 2678 / 8821 as participant-employer with Continuum as designee | flagged `unconfirmed` in the config and tagged in the UI |
+| `enrollment@` vs `enrollments@continuumfs.com` | using `enrollment@` (the majority of calls); noted in `src/lib/email.ts` |
+| Fingerprint fee reimbursement — receipts to `invoices@`, ~10 business days by money order | not modelled; no reimbursement flow exists yet |
+| Program scope | the notes say Continuum serves COMP and NOW for participant direction, but ICWP, CCSP and SOURCE all appear elsewhere. All five are configured, per the original brief |
+| Portal URL in emails | `https://portal.continuumfs.com` is a **placeholder** — the real URL was never given |
+
+Not modelled at all: the Checkpoint fingerprint flow and the Good to Go email,
+the family-hire approval and yearly renewal cycle (including the time-entry lock
+and one-week courtesy extension), EVV, time entry and payroll. Those are
+separate workflows, not enrollment intake.
 
 Programs live in `src/config/programs.ts`, statuses in `src/config/statuses.ts`.
+The employee-vs-vendor comparison shown on step 1 of the enrollment flow is
+`EMPLOYEE_VS_VENDOR` in the same file.
 
 An enrollment can carry any number of waiver programs. They are stored one row
 per `(enrollment, program)` in `EnrollmentProgram` rather than as a delimited

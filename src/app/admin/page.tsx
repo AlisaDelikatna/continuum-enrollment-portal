@@ -7,7 +7,7 @@ import { typeLabel } from "@/config/programs";
 import { STATUSES, statusLabel } from "@/config/statuses";
 import { prisma } from "@/lib/db";
 import { dayBounds } from "@/lib/email";
-import { documentProgress, formatDate, programList } from "@/lib/enrollments";
+import { documentProgress, formatDate, programCodes, programList } from "@/lib/enrollments";
 import { getActingUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -145,6 +145,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
                 const progress = documentProgress(
                   enrollment.type,
                   enrollment.documents.map((d) => d.docKey),
+                  programCodes(enrollment),
                 );
                 return (
                   <tr key={enrollment.id} className="hover:bg-slate-50/70">

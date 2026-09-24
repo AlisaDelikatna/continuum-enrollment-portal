@@ -9,6 +9,7 @@ export type EnrollmentFactsInput = {
   email: string;
   phone: string | null;
   participantName: string | null;
+  relationship: string | null;
   businessName: string | null;
   contactName: string | null;
   repNameRaw: string | null;
@@ -40,6 +41,14 @@ export function EnrollmentFacts({ enrollment }: { enrollment: EnrollmentFactsInp
 
   if (enrollment.type === "EMPLOYEE") {
     facts.push(["Works for participant", enrollment.participantName ?? "—"]);
+    facts.push([
+      "Relationship to participant",
+      enrollment.relationship ?? (
+        <span key="rel-missing" className="text-amber-700">
+          Not provided — packets are held without it
+        </span>
+      ),
+    ]);
     facts.push([
       "Assigned representative",
       enrollment.rep ? (

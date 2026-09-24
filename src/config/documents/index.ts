@@ -20,11 +20,28 @@ export const OTHER_DOCUMENT: RequiredDocument = {
   required: false,
 };
 
-export function documentsFor(type: string): RequiredDocument[] {
+/** Every configured document for a type, including program-specific ones. */
+export function allDocumentsFor(type: string): RequiredDocument[] {
   return REQUIRED_DOCUMENTS[type as EnrolleeType] ?? [];
+}
+
+/**
+ * The documents this particular enrollment needs.
+ *
+ * Some requirements only apply to certain waivers — the TB test and physical is
+ * ICWP-only, for instance — so pass the enrollment's program codes. With no
+ * programs supplied, program-specific documents are left out rather than asked
+ * for speculatively.
+ */
+export function documentsFor(type: string, programs: string[] = []): RequiredDocument[] {
+  return allDocumentsFor(type).filter(
+    (doc) => !doc.programs || doc.programs.some((program) => programs.includes(program)),
+  );
 }
 
 export function documentLabel(type: string, key: string): string {
   if (key === OTHER_DOCUMENT.key) return OTHER_DOCUMENT.label;
-  return documentsFor(type).find((d) => d.key === key)?.label ?? key;
+  // Looked up against the full list: a document can be filed under a
+  // program-specific slot and still need a label later.
+  return allDocumentsFor(type).find((d) => d.key === key)?.label ?? key;
 }

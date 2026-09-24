@@ -23,17 +23,21 @@ export async function nextRefId(type: string) {
   return `CFS-${prefix}-${Date.now().toString().slice(-6)}`;
 }
 
-/** How many of the *required* slots for this type have at least one upload. */
-export function documentProgress(type: string, docKeys: string[]) {
-  const required = documentsFor(type).filter((d) => d.required);
+/**
+ * How many of the *required* slots for this enrollment have at least one upload.
+ * `programs` matters: program-specific requirements (the ICWP TB test, say)
+ * only count for enrollments under that waiver.
+ */
+export function documentProgress(type: string, docKeys: string[], programs: string[] = []) {
+  const required = documentsFor(type, programs).filter((d) => d.required);
   const present = new Set(docKeys);
   const complete = required.filter((d) => present.has(d.key)).length;
   return { complete, total: required.length };
 }
 
-export function missingDocuments(type: string, docKeys: string[]) {
+export function missingDocuments(type: string, docKeys: string[], programs: string[] = []) {
   const present = new Set(docKeys);
-  return documentsFor(type).filter((d) => d.required && !present.has(d.key));
+  return documentsFor(type, programs).filter((d) => d.required && !present.has(d.key));
 }
 
 /** The note attached to the most recent MISSING_INFO event, if that's the current status. */

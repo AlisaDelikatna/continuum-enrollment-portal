@@ -19,11 +19,14 @@ export type DocumentRow = {
 export function DocumentChecklist({
   type,
   documents,
+  programs = [],
 }: {
   type: string;
   documents: DocumentRow[];
+  /** Program codes on the enrollment — some requirements are waiver-specific. */
+  programs?: string[];
 }) {
-  const slots = documentsFor(type);
+  const slots = documentsFor(type, programs);
   const byKey = new Map<string, DocumentRow[]>();
   for (const doc of documents) {
     byKey.set(doc.docKey, [...(byKey.get(doc.docKey) ?? []), doc]);
@@ -58,10 +61,21 @@ export function DocumentChecklist({
                       Optional
                     </span>
                   )}
+                  {slot.programs && (
+                    <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                      {slot.programs.join("/")} only
+                    </span>
+                  )}
+                  {slot.unconfirmed && (
+                    <span
+                      title="From only a few source calls — confirm with a supervisor."
+                      className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800"
+                    >
+                      Unconfirmed
+                    </span>
+                  )}
                 </div>
-                {!received && slot.hint && (
-                  <p className="mt-0.5 text-xs text-slate-500">{slot.hint}</p>
-                )}
+                {slot.hint && <p className="mt-0.5 text-xs text-slate-500">{slot.hint}</p>}
                 {uploads.map((doc) => (
                   <FileLine key={doc.id} doc={doc} />
                 ))}

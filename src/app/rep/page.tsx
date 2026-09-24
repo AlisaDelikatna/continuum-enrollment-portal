@@ -2,7 +2,7 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/StatusBadge";
 import { STATUSES, statusLabel } from "@/config/statuses";
 import { prisma } from "@/lib/db";
-import { documentProgress, formatDate, programList } from "@/lib/enrollments";
+import { documentProgress, formatDate, programCodes, programList } from "@/lib/enrollments";
 import { getActingUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -110,6 +110,7 @@ export default async function RepPage() {
                 const progress = documentProgress(
                   employee.type,
                   employee.documents.map((d) => d.docKey),
+                  programCodes(employee),
                 );
                 const complete = progress.complete === progress.total;
                 return (

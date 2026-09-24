@@ -8,8 +8,13 @@ import { programList } from "./enrollments";
  * OutboxEmail table and rendered at /outbox so it can be shown live.
  */
 
-const FROM = "Continuum Fiscal Services <enrollment@continuumfiscal.example>";
-const PORTAL_URL = "https://portal.continuumfiscal.example";
+// Source calls mostly gave "enrollment@"; a single call said "enrollments@".
+// Using the majority spelling — worth confirming before this goes anywhere real.
+const ENROLLMENT_INBOX = "enrollment@continuumfs.com";
+const PHONE = "678-974-7942";
+
+// PLACEHOLDER — the real portal URL was never given in the source notes.
+const PORTAL_URL = "https://portal.continuumfs.com";
 
 type QueueArgs = {
   to: string[];
@@ -37,8 +42,9 @@ function signature() {
   return [
     "",
     "— Continuum Fiscal Services",
-    "Enrollment Team · (Demo environment — no real email was sent)",
-    FROM,
+    `Enrollment Team · ${PHONE} · ${ENROLLMENT_INBOX}`,
+    "260 Peachtree St NW, Suite 1903, Atlanta, GA 30303",
+    "(Demo environment — no real email was sent)",
   ].join("\n");
 }
 
@@ -143,7 +149,7 @@ export async function sendEnrollmentReceivedEmail(enrollmentId: string) {
     `Enrollment ID: ${enrollment.refId}`,
     `Current status: ${statusLabel("RECEIVED")}`,
     "",
-    "Our enrollment team reviews new packets in the order received. You can upload any remaining documents at any time from your status page.",
+    "Packets are reviewed first-in, first-out — allow 24–48 business hours, longer during payroll week. You can upload any remaining documents at any time from your status page.",
     "",
     `Status page: ${PORTAL_URL}/me`,
     signature(),

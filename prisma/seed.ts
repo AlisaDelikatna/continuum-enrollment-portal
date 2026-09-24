@@ -125,6 +125,7 @@ type SeedEnrollment = {
   status: Status;
   age: number;
   participantName?: string;
+  relationship?: string;
   repIndex?: number;
   repNameRaw?: string;
   repEmailRaw?: string;
@@ -140,61 +141,61 @@ const ENROLLMENTS: SeedEnrollment[] = [
   {
     type: "EMPLOYEE", name: "Jordan Ellis", email: "jordan.ellis@example.com",
     phone: "(404) 555-0143", programs: ["COMP", "NOW"], status: "ACTIVE", age: 96,
-    participantName: "Marcus Alvarado", repIndex: 0, detour: true,
+    participantName: "Marcus Alvarado", relationship: "Son", repIndex: 0, detour: true,
   },
   {
     type: "EMPLOYEE", name: "Alicia Ferrer", email: "alicia.ferrer@example.com",
     phone: "(404) 555-0147", programs: ["NOW"], status: "IN_REVIEW", age: 12,
-    participantName: "Dee Whitmore", repIndex: 0, uploadsToday: 1,
+    participantName: "Dee Whitmore", relationship: "No relation", repIndex: 0, uploadsToday: 1,
   },
   {
     type: "EMPLOYEE", name: "Samuel Otieno", email: "samuel.otieno@example.com",
     phone: "(770) 555-0151", programs: ["CCSP"], status: "MISSING_INFO", age: 21,
-    participantName: "Harold Pryce", repIndex: 0,
+    participantName: "Harold Pryce", relationship: "Nephew", repIndex: 0,
     missingNote:
       "Page 2 of the Form I-9 is unsigned, and the supporting photo ID was cut off in the scan. Please re-upload both. We also still need the Georgia Form G-4.",
   },
   {
     type: "EMPLOYEE", name: "Bianca Ruiz", email: "bianca.ruiz@example.com",
     phone: "(478) 555-0158", programs: ["SOURCE"], status: "ACKNOWLEDGED", age: 6,
-    participantName: "Nina Castellano", repIndex: 1,
+    participantName: "Nina Castellano", relationship: "Daughter", repIndex: 1,
   },
   {
     type: "EMPLOYEE", name: "Derrick Hale", email: "derrick.hale@example.com",
     phone: "(404) 555-0162", programs: ["ICWP"], status: "PROCESSED", age: 44,
-    participantName: "Roy Sandiford", repIndex: 1,
+    participantName: "Roy Sandiford", relationship: "No relation", repIndex: 1,
   },
   {
     type: "EMPLOYEE", name: "Keisha Moreland", email: "keisha.moreland@example.com",
     phone: "(770) 555-0169", programs: ["COMP", "SOURCE"], status: "ACTIVE", age: 130,
-    participantName: "Marcus Alvarado", repIndex: 1,
+    participantName: "Marcus Alvarado", relationship: "Sister", repIndex: 1,
   },
   {
     type: "EMPLOYEE", name: "Tomas Vega", email: "tomas.vega@example.com",
     phone: "(478) 555-0174", programs: ["NOW"], status: "RECEIVED", age: 2,
-    participantName: "Elaine Dorsey", repIndex: 2, uploadsToday: 1,
+    participantName: "Elaine Dorsey", relationship: "No relation", repIndex: 2, uploadsToday: 1,
   },
   {
     type: "EMPLOYEE", name: "Hannah Wexler", email: "hannah.wexler@example.com",
     phone: "(404) 555-0180", programs: ["CCSP", "SOURCE"], status: "MISSING_INFO", age: 30,
-    participantName: "Grady Lutz", repIndex: 2,
+    participantName: "Grady Lutz", relationship: "Daughter", repIndex: 2,
     missingNote:
       "The background check consent form is missing a date next to the signature, and we have no direct deposit authorization on file. Paper checks will be issued until one is received.",
   },
   {
     type: "EMPLOYEE", name: "Omar Siddiqui", email: "omar.siddiqui@example.com",
     phone: "(770) 555-0186", programs: ["SOURCE", "ICWP"], status: "IN_REVIEW", age: 17,
-    participantName: "Nina Castellano", repIndex: 2,
+    participantName: "Nina Castellano", relationship: "No relation", repIndex: 2,
   },
   {
     type: "EMPLOYEE", name: "Rebecca Lindgren", email: "rebecca.lindgren@example.com",
     phone: "(404) 555-0191", programs: ["ICWP"], status: "ACTIVE", age: 78,
-    participantName: "Roy Sandiford", repIndex: 0,
+    participantName: "Roy Sandiford", relationship: "Wife", repIndex: 0,
   },
   {
     type: "EMPLOYEE", name: "Andre Coleman", email: "andre.coleman@example.com",
     phone: "(478) 555-0195", programs: ["COMP"], status: "PROCESSED", age: 38,
-    participantName: "Harold Pryce", repIndex: 1, detour: true,
+    participantName: "Harold Pryce", relationship: "No relation", repIndex: 1, detour: true,
   },
   {
     type: "EMPLOYEE", name: "Priscilla Nwosu", email: "priscilla.nwosu@example.com",
@@ -378,6 +379,7 @@ async function main() {
         email: seed.email,
         phone: seed.phone,
         participantName: seed.participantName ?? null,
+        relationship: seed.relationship ?? null,
         repNameRaw: seed.repNameRaw ?? rep?.name ?? null,
         repEmailRaw: seed.repEmailRaw ?? rep?.email ?? null,
         businessName: seed.businessName ?? null,
@@ -417,7 +419,7 @@ async function main() {
     const lastEventAt = new Date(createdAt.getTime() + stepMs * (chain.length - 1));
 
     // --- documents -----------------------------------------------------
-    const required = documentsFor(seed.type);
+    const required = documentsFor(seed.type, seed.programs);
     const howMany = documentCountFor(seed.status, required.filter((d) => d.required).length);
     const requiredDocs = required.filter((d) => d.required).slice(0, howMany);
     const optionalDoc =

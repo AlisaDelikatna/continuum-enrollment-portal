@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { documentsFor, OTHER_DOCUMENT } from "@/config/documents";
 import {
+  EMPLOYEE_VS_VENDOR,
   ENROLLEE_TYPES,
   PROGRAM_LABELS,
   PROGRAMS,
@@ -71,6 +72,45 @@ export function EnrollWizard() {
               </button>
             ))}
           </div>
+
+          <details className="mt-5 card card-pad">
+            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+              Not sure whether a caregiver is an employee or a vendor?
+              <span className="ml-2 font-normal text-brand-600">Compare →</span>
+            </summary>
+            <div className="mt-4 overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr>
+                    <th className="table-head w-40">&nbsp;</th>
+                    <th className="table-head">Employee</th>
+                    <th className="table-head">Vendor</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {EMPLOYEE_VS_VENDOR.map((row) => (
+                    <tr key={row.aspect}>
+                      <td className="px-4 py-2.5 text-sm font-medium text-slate-900 align-top">
+                        {row.aspect}
+                      </td>
+                      <td className="px-4 py-2.5 text-sm text-slate-600 align-top">
+                        {row.employee}
+                      </td>
+                      <td className="px-4 py-2.5 text-sm text-slate-600 align-top">
+                        {row.vendor}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-3 text-xs text-slate-500">
+              The service must sit on the participant&apos;s PA/budget under a code
+              Continuum is authorised for. If it might not be covered, the state has
+              to approve it in writing before a vendor can be added — being in the
+              ISP is not enough.
+            </p>
+          </details>
         </section>
       )}
 
@@ -104,6 +144,7 @@ export function EnrollWizard() {
                     email: String(data.get("email") ?? ""),
                     phone: String(data.get("phone") ?? ""),
                     participantName: String(data.get("participantName") ?? ""),
+                    relationship: String(data.get("relationship") ?? ""),
                     repName: String(data.get("repName") ?? ""),
                     repEmail: String(data.get("repEmail") ?? ""),
                     businessName: String(data.get("businessName") ?? ""),
@@ -194,7 +235,11 @@ export function EnrollWizard() {
                     name="participantName"
                     placeholder="Marcus Alvarado"
                   />
-                  <div className="hidden sm:block" />
+                  <Field
+                    label="Your relationship to them"
+                    name="relationship"
+                    placeholder="Daughter, neighbour, no relation…"
+                  />
                   <Field
                     label="Representative name"
                     name="repName"
@@ -210,8 +255,10 @@ export function EnrollWizard() {
                   />
                 </div>
                 <p className="mt-3 text-xs text-slate-500">
-                  If your representative already works with us we&apos;ll link them to
-                  your record automatically; otherwise an admin assigns one.
+                  A missing relationship is one of the two most common reasons a
+                  packet is held. If your representative already works with us
+                  we&apos;ll link them to your record automatically; otherwise an
+                  admin assigns one.
                 </p>
               </fieldset>
             )}
@@ -280,7 +327,7 @@ export function EnrollWizard() {
           >
             <input type="hidden" name="enrollmentId" value={created.id} />
             <ul className="divide-y divide-slate-100">
-              {[...documentsFor(type), OTHER_DOCUMENT].map((doc) => (
+              {[...documentsFor(type, created.programs), OTHER_DOCUMENT].map((doc) => (
                 <li key={doc.key} className="py-3 first:pt-0 grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,18rem)] sm:items-center">
                   <div>
                     <p className="text-sm font-medium text-slate-900">
@@ -292,6 +339,11 @@ export function EnrollWizard() {
                       ) : (
                         <span className="ml-2 text-[11px] uppercase tracking-wide text-slate-400">
                           Optional
+                        </span>
+                      )}
+                      {doc.programs && (
+                        <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                          {doc.programs.join("/")} only
                         </span>
                       )}
                     </p>

@@ -48,6 +48,9 @@ model Enrollment {
 
   // Employee-specific
   participantName String?
+  /// Relationship to the participant. A missing relationship is one of the two
+  /// most common reasons an employee packet is held, so it is asked for up front.
+  relationship    String?
   /// Rep name/email as typed on the public form (before an admin assigns a real rep).
   repNameRaw      String?
   repEmailRaw     String?

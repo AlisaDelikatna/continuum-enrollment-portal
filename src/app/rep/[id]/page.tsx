@@ -8,7 +8,7 @@ import { StatusProgress, StatusTimeline } from "@/components/StatusTimeline";
 import { UploadForm } from "@/components/UploadForm";
 import { documentsFor } from "@/config/documents";
 import { prisma } from "@/lib/db";
-import { documentProgress, programList } from "@/lib/enrollments";
+import { documentProgress, programCodes, programList } from "@/lib/enrollments";
 import { getActingUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -55,9 +55,11 @@ export default async function RepEmployeePage(props: PageProps<"/rep/[id]">) {
     enrollment.status === "MISSING_INFO"
       ? enrollment.statusEvents.find((e) => e.status === "MISSING_INFO")
       : null;
+  const codes = programCodes(enrollment);
   const progress = documentProgress(
     enrollment.type,
     enrollment.documents.map((d) => d.docKey),
+    codes,
   );
 
   return (
@@ -105,7 +107,11 @@ export default async function RepEmployeePage(props: PageProps<"/rep/[id]">) {
             </span>
           </div>
           <div className="mt-4">
-            <DocumentChecklist type={enrollment.type} documents={enrollment.documents} />
+            <DocumentChecklist
+              type={enrollment.type}
+              documents={enrollment.documents}
+              programs={codes}
+            />
           </div>
           <div className="mt-6 border-t border-slate-100 pt-5">
             <h3 className="text-sm font-semibold text-slate-900">
@@ -117,7 +123,7 @@ export default async function RepEmployeePage(props: PageProps<"/rep/[id]">) {
             </p>
             <UploadForm
               enrollmentId={enrollment.id}
-              documents={documentsFor(enrollment.type)}
+              documents={documentsFor(enrollment.type, codes)}
               onBehalfOf={enrollment.name}
             />
           </div>
