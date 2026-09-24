@@ -14,7 +14,14 @@ real authentication, no encryption at rest, and no audit-grade access control.
 
 ```bash
 npm install     # also runs `prisma generate`
-npm run seed    # creates the SQLite DB and loads ~25 demo enrollees
+npm run demo    # reseeds to a clean state, then serves on http://localhost:3000
+```
+
+`npm run demo` is the one to use before presenting — it resets the data and
+starts the server in a single step. The parts separately:
+
+```bash
+npm run seed    # wipe and reload ~25 demo enrollees, documents and emails
 npm run dev     # http://localhost:3000
 ```
 
