@@ -8,7 +8,7 @@ import { StatusProgress, StatusTimeline } from "@/components/StatusTimeline";
 import { UploadForm } from "@/components/UploadForm";
 import { documentsFor } from "@/config/documents";
 import { prisma } from "@/lib/db";
-import { documentProgress } from "@/lib/enrollments";
+import { documentProgress, programList } from "@/lib/enrollments";
 import { getActingUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +33,7 @@ export default async function RepEmployeePage(props: PageProps<"/rep/[id]">) {
   const enrollment = await prisma.enrollment.findUnique({
     where: { id },
     include: {
+      programs: { select: { program: true } },
       rep: { select: { name: true, email: true } },
       documents: {
         orderBy: { createdAt: "desc" },
@@ -73,7 +74,7 @@ export default async function RepEmployeePage(props: PageProps<"/rep/[id]">) {
           <StatusBadge status={enrollment.status} />
         </div>
         <p className="mt-1 text-sm text-slate-600">
-          <span className="font-mono">{enrollment.refId}</span> · {enrollment.program} waiver
+          <span className="font-mono">{enrollment.refId}</span> · {programList(enrollment)}
           {enrollment.participantName && <> · works for {enrollment.participantName}</>}
         </p>
       </div>

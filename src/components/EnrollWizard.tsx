@@ -22,6 +22,7 @@ export function EnrollWizard() {
   const [step, setStep] = useState(0);
   const [type, setType] = useState<EnrolleeType | null>(null);
   const [created, setCreated] = useState<CreatedEnrollment | null>(null);
+  const [programs, setPrograms] = useState<string[]>([]);
   const [uploadSummary, setUploadSummary] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -52,6 +53,7 @@ export function EnrollWizard() {
                 type="button"
                 onClick={() => {
                   setType(option);
+                  setPrograms([]);
                   setError(null);
                   setStep(1);
                 }}
@@ -89,11 +91,15 @@ export function EnrollWizard() {
               event.preventDefault();
               const data = new FormData(event.currentTarget);
               setError(null);
+              if (programs.length === 0) {
+                setError("Select at least one waiver program.");
+                return;
+              }
               startTransition(async () => {
                 try {
                   const result = await createEnrollment({
                     type,
-                    program: String(data.get("program") ?? ""),
+                    programs,
                     name: String(data.get("name") ?? ""),
                     email: String(data.get("email") ?? ""),
                     phone: String(data.get("phone") ?? ""),
@@ -130,22 +136,52 @@ export function EnrollWizard() {
                 placeholder="name@example.com"
               />
               <Field label="Phone" name="phone" placeholder="(404) 555-0143" />
-              <div>
-                <label className="label" htmlFor="program">
-                  Waiver program <span className="text-rose-600">*</span>
-                </label>
-                <select id="program" name="program" required className="input" defaultValue="">
-                  <option value="" disabled>
-                    Select a program…
-                  </option>
-                  {PROGRAMS.map((program) => (
-                    <option key={program} value={program}>
-                      {PROGRAM_LABELS[program]}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
+
+            <fieldset>
+              <legend className="label">
+                Waiver programs <span className="text-rose-600">*</span>
+                <span className="ml-1 font-normal text-slate-400">
+                  select every program that applies
+                </span>
+              </legend>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {PROGRAMS.map((program) => {
+                  const checked = programs.includes(program);
+                  return (
+                    <label
+                      key={program}
+                      className={`flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2.5 text-sm ring-1 ring-inset transition ${
+                        checked
+                          ? "bg-brand-50 text-brand-900 ring-brand-400"
+                          : "bg-white text-slate-700 ring-slate-200 hover:bg-slate-50"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        name="programs"
+                        value={program}
+                        checked={checked}
+                        onChange={(event) =>
+                          setPrograms((current) =>
+                            event.target.checked
+                              ? [...current, program]
+                              : current.filter((p) => p !== program),
+                          )
+                        }
+                        className="mt-0.5 h-4 w-4 accent-[#0f6d64]"
+                      />
+                      <span>
+                        <span className="font-semibold">{program}</span>
+                        <span className="block text-xs text-slate-500">
+                          {PROGRAM_LABELS[program].split(" — ")[1]}
+                        </span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
 
             {type === "EMPLOYEE" && (
               <fieldset className="rounded-lg bg-slate-50 p-4">
@@ -355,8 +391,8 @@ export function EnrollWizard() {
               <Link href="/me" className="btn-primary">
                 View my status page
               </Link>
-              <Link href="/outbox" className="btn-secondary">
-                See the confirmation email
+              <Link href="/enroll" className="btn-secondary">
+                Enroll someone else
               </Link>
             </div>
           </div>

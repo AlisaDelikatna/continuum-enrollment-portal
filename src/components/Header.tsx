@@ -39,7 +39,7 @@ export async function Header() {
             {role === "ENROLLEE" && <NavLink href="/me">My enrollment</NavLink>}
             {role === "REP" && <NavLink href="/rep">My employees</NavLink>}
             {role === "ADMIN" && <NavLink href="/admin">Admin</NavLink>}
-            <NavLink href="/outbox">Outbox</NavLink>
+            {role === "ADMIN" && <NavLink href="/outbox">Outbox</NavLink>}
           </nav>
 
           <div className="flex items-center gap-3">
@@ -57,7 +57,7 @@ export async function Header() {
           {role === "ENROLLEE" && <NavLink href="/me">My enrollment</NavLink>}
           {role === "REP" && <NavLink href="/rep">My employees</NavLink>}
           {role === "ADMIN" && <NavLink href="/admin">Admin</NavLink>}
-          <NavLink href="/outbox">Outbox</NavLink>
+          {role === "ADMIN" && <NavLink href="/outbox">Outbox</NavLink>}
         </nav>
       </div>
     </header>

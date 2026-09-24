@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { getActingUser } from "@/lib/session";
 import { formatDateTime } from "@/lib/enrollments";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,26 @@ const KIND_STYLES: Record<string, string> = {
 };
 
 export default async function OutboxPage(props: PageProps<"/outbox">) {
+  // The outbox is the system-wide notification log: it contains every
+  // enrollee's name, address and status notes. Admin staff only — a rep must
+  // not see participant or vendor correspondence here.
+  const actor = await getActingUser();
+  if (!actor || actor.role !== "ADMIN") {
+    return (
+      <div className="mx-auto max-w-2xl px-4 sm:px-6 py-16">
+        <div className="card card-pad">
+          <h1 className="text-lg font-semibold text-slate-900">
+            Outbox is for admin staff
+          </h1>
+          <p className="mt-2 text-sm text-slate-600">
+            This log holds correspondence for every enrollee. Switch to an admin
+            user in the header to read it.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const rawKind = (await props.searchParams).kind;
   const kind = Array.isArray(rawKind) ? rawKind[0] : rawKind;
 

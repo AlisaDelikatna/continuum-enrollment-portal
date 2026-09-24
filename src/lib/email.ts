@@ -1,6 +1,7 @@
 import { statusLabel } from "../config/statuses";
 import { typeLabel } from "../config/programs";
 import { prisma } from "./db";
+import { programList } from "./enrollments";
 
 /**
  * Nothing here talks to an SMTP server. Every message is written to the
@@ -47,7 +48,7 @@ type EnrollmentForEmail = {
   type: string;
   name: string;
   email: string;
-  program: string;
+  programs: { program: string }[];
   repEmailRaw: string | null;
   rep: { name: string; email: string } | null;
 };
@@ -61,7 +62,7 @@ async function loadEnrollment(enrollmentId: string) {
       type: true,
       name: true,
       email: true,
-      program: true,
+      programs: { select: { program: true } },
       repEmailRaw: true,
       rep: { select: { name: true, email: true } },
     },
@@ -97,7 +98,7 @@ export async function sendStatusChangeEmail(opts: {
     "",
     `The status of enrollment ${enrollment.refId} (${typeLabel(
       enrollment.type,
-    )} · ${enrollment.program} waiver) is now: ${label}.`,
+    )} · ${programList(enrollment)}) is now: ${label}.`,
   ];
 
   if (opts.status === "MISSING_INFO") {
@@ -135,9 +136,9 @@ export async function sendEnrollmentReceivedEmail(enrollmentId: string) {
   const body = [
     `Hello ${enrollment.name},`,
     "",
-    `We received your ${typeLabel(enrollment.type).toLowerCase()} enrollment for the ${
-      enrollment.program
-    } waiver program.`,
+    `We received your ${typeLabel(enrollment.type).toLowerCase()} enrollment for the following waiver program(s): ${programList(
+      enrollment,
+    )}.`,
     "",
     `Enrollment ID: ${enrollment.refId}`,
     `Current status: ${statusLabel("RECEIVED")}`,

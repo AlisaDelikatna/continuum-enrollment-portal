@@ -121,7 +121,7 @@ type SeedEnrollment = {
   name: string;
   email: string;
   phone: string;
-  program: "COMP" | "NOW" | "CCSP" | "SOURCE" | "ICWP";
+  programs: Array<"COMP" | "NOW" | "CCSP" | "SOURCE" | "ICWP">;
   status: Status;
   age: number;
   participantName?: string;
@@ -139,66 +139,66 @@ const ENROLLMENTS: SeedEnrollment[] = [
   // ---- Employees -------------------------------------------------------
   {
     type: "EMPLOYEE", name: "Jordan Ellis", email: "jordan.ellis@example.com",
-    phone: "(404) 555-0143", program: "COMP", status: "ACTIVE", age: 96,
+    phone: "(404) 555-0143", programs: ["COMP", "NOW"], status: "ACTIVE", age: 96,
     participantName: "Marcus Alvarado", repIndex: 0, detour: true,
   },
   {
     type: "EMPLOYEE", name: "Alicia Ferrer", email: "alicia.ferrer@example.com",
-    phone: "(404) 555-0147", program: "NOW", status: "IN_REVIEW", age: 12,
+    phone: "(404) 555-0147", programs: ["NOW"], status: "IN_REVIEW", age: 12,
     participantName: "Dee Whitmore", repIndex: 0, uploadsToday: 1,
   },
   {
     type: "EMPLOYEE", name: "Samuel Otieno", email: "samuel.otieno@example.com",
-    phone: "(770) 555-0151", program: "CCSP", status: "MISSING_INFO", age: 21,
+    phone: "(770) 555-0151", programs: ["CCSP"], status: "MISSING_INFO", age: 21,
     participantName: "Harold Pryce", repIndex: 0,
     missingNote:
       "Page 2 of the Form I-9 is unsigned, and the supporting photo ID was cut off in the scan. Please re-upload both. We also still need the Georgia Form G-4.",
   },
   {
     type: "EMPLOYEE", name: "Bianca Ruiz", email: "bianca.ruiz@example.com",
-    phone: "(478) 555-0158", program: "SOURCE", status: "ACKNOWLEDGED", age: 6,
+    phone: "(478) 555-0158", programs: ["SOURCE"], status: "ACKNOWLEDGED", age: 6,
     participantName: "Nina Castellano", repIndex: 1,
   },
   {
     type: "EMPLOYEE", name: "Derrick Hale", email: "derrick.hale@example.com",
-    phone: "(404) 555-0162", program: "ICWP", status: "PROCESSED", age: 44,
+    phone: "(404) 555-0162", programs: ["ICWP"], status: "PROCESSED", age: 44,
     participantName: "Roy Sandiford", repIndex: 1,
   },
   {
     type: "EMPLOYEE", name: "Keisha Moreland", email: "keisha.moreland@example.com",
-    phone: "(770) 555-0169", program: "COMP", status: "ACTIVE", age: 130,
+    phone: "(770) 555-0169", programs: ["COMP", "SOURCE"], status: "ACTIVE", age: 130,
     participantName: "Marcus Alvarado", repIndex: 1,
   },
   {
     type: "EMPLOYEE", name: "Tomas Vega", email: "tomas.vega@example.com",
-    phone: "(478) 555-0174", program: "NOW", status: "RECEIVED", age: 2,
+    phone: "(478) 555-0174", programs: ["NOW"], status: "RECEIVED", age: 2,
     participantName: "Elaine Dorsey", repIndex: 2, uploadsToday: 1,
   },
   {
     type: "EMPLOYEE", name: "Hannah Wexler", email: "hannah.wexler@example.com",
-    phone: "(404) 555-0180", program: "CCSP", status: "MISSING_INFO", age: 30,
+    phone: "(404) 555-0180", programs: ["CCSP", "SOURCE"], status: "MISSING_INFO", age: 30,
     participantName: "Grady Lutz", repIndex: 2,
     missingNote:
       "The background check consent form is missing a date next to the signature, and we have no direct deposit authorization on file. Paper checks will be issued until one is received.",
   },
   {
     type: "EMPLOYEE", name: "Omar Siddiqui", email: "omar.siddiqui@example.com",
-    phone: "(770) 555-0186", program: "SOURCE", status: "IN_REVIEW", age: 17,
+    phone: "(770) 555-0186", programs: ["SOURCE", "ICWP"], status: "IN_REVIEW", age: 17,
     participantName: "Nina Castellano", repIndex: 2,
   },
   {
     type: "EMPLOYEE", name: "Rebecca Lindgren", email: "rebecca.lindgren@example.com",
-    phone: "(404) 555-0191", program: "ICWP", status: "ACTIVE", age: 78,
+    phone: "(404) 555-0191", programs: ["ICWP"], status: "ACTIVE", age: 78,
     participantName: "Roy Sandiford", repIndex: 0,
   },
   {
     type: "EMPLOYEE", name: "Andre Coleman", email: "andre.coleman@example.com",
-    phone: "(478) 555-0195", program: "COMP", status: "PROCESSED", age: 38,
+    phone: "(478) 555-0195", programs: ["COMP"], status: "PROCESSED", age: 38,
     participantName: "Harold Pryce", repIndex: 1, detour: true,
   },
   {
     type: "EMPLOYEE", name: "Priscilla Nwosu", email: "priscilla.nwosu@example.com",
-    phone: "(770) 555-0199", program: "NOW", status: "RECEIVED", age: 1,
+    phone: "(770) 555-0199", programs: ["NOW"], status: "RECEIVED", age: 1,
     participantName: "Elaine Dorsey",
     repNameRaw: "T. Okonkwo", repEmailRaw: "t.okonkwo@example.com",
     uploadsToday: 1,
@@ -207,67 +207,67 @@ const ENROLLMENTS: SeedEnrollment[] = [
   // ---- Participants ----------------------------------------------------
   {
     type: "PARTICIPANT", name: "Marcus Alvarado", email: "marcus.alvarado@example.com",
-    phone: "(404) 555-0210", program: "COMP", status: "ACTIVE", age: 150,
+    phone: "(404) 555-0210", programs: ["COMP", "NOW"], status: "ACTIVE", age: 150,
   },
   {
     type: "PARTICIPANT", name: "Nina Castellano", email: "nina.castellano@example.com",
-    phone: "(770) 555-0214", program: "SOURCE", status: "IN_REVIEW", age: 19,
+    phone: "(770) 555-0214", programs: ["SOURCE"], status: "IN_REVIEW", age: 19,
   },
   {
     type: "PARTICIPANT", name: "Harold Pryce", email: "harold.pryce@example.com",
-    phone: "(478) 555-0218", program: "CCSP", status: "PROCESSED", age: 52,
+    phone: "(478) 555-0218", programs: ["CCSP"], status: "PROCESSED", age: 52,
   },
   {
     type: "PARTICIPANT", name: "Elaine Dorsey", email: "elaine.dorsey@example.com",
-    phone: "(404) 555-0223", program: "NOW", status: "ACKNOWLEDGED", age: 8,
+    phone: "(404) 555-0223", programs: ["NOW"], status: "ACKNOWLEDGED", age: 8,
   },
   {
     type: "PARTICIPANT", name: "Roy Sandiford", email: "roy.sandiford@example.com",
-    phone: "(770) 555-0227", program: "ICWP", status: "ACTIVE", age: 115,
+    phone: "(770) 555-0227", programs: ["ICWP"], status: "ACTIVE", age: 115,
   },
   {
     type: "PARTICIPANT", name: "Dee Whitmore", email: "dee.whitmore@example.com",
-    phone: "(478) 555-0231", program: "NOW", status: "MISSING_INFO", age: 26,
+    phone: "(478) 555-0231", programs: ["NOW"], status: "MISSING_INFO", age: 26,
     missingNote:
       "IRS Form 2678 is signed but the employer identification number field is blank, so we cannot file it. Please re-upload a completed copy.",
   },
   {
     type: "PARTICIPANT", name: "Grady Lutz", email: "grady.lutz@example.com",
-    phone: "(404) 555-0235", program: "CCSP", status: "RECEIVED", age: 3,
+    phone: "(404) 555-0235", programs: ["CCSP"], status: "RECEIVED", age: 3,
   },
 
   // ---- Vendors ---------------------------------------------------------
   {
     type: "VENDOR", name: "Dana Whitfield", email: "ap@peachtreemobility.example",
-    phone: "(404) 555-0240", program: "COMP", status: "ACTIVE", age: 140,
+    phone: "(404) 555-0240", programs: ["COMP", "NOW", "CCSP"], status: "ACTIVE", age: 140,
     businessName: "Peachtree Mobility Supply LLC", contactName: "Dana Whitfield",
   },
   {
     type: "VENDOR", name: "Leo Barnhart", email: "billing@savannahrespite.example",
-    phone: "(912) 555-0244", program: "SOURCE", status: "IN_REVIEW", age: 15,
+    phone: "(912) 555-0244", programs: ["SOURCE"], status: "IN_REVIEW", age: 15,
     businessName: "Savannah Respite Partners", contactName: "Leo Barnhart",
     uploadsToday: 1,
   },
   {
     type: "VENDOR", name: "Ruth Kellerman", email: "office@chattahoocheehomemods.example",
-    phone: "(706) 555-0248", program: "ICWP", status: "MISSING_INFO", age: 33,
+    phone: "(706) 555-0248", programs: ["ICWP"], status: "MISSING_INFO", age: 33,
     businessName: "Chattahoochee Home Modifications", contactName: "Ruth Kellerman",
     missingNote:
       "The certificate of liability insurance on file expired last month. We need a current certificate before any invoices can be paid.",
   },
   {
     type: "VENDOR", name: "Vincent Moy", email: "vincent@athensadaptive.example",
-    phone: "(706) 555-0252", program: "NOW", status: "PROCESSED", age: 41,
+    phone: "(706) 555-0252", programs: ["NOW", "ICWP"], status: "PROCESSED", age: 41,
     businessName: "Athens Adaptive Technology", contactName: "Vincent Moy",
   },
   {
     type: "VENDOR", name: "Gloria Estrada", email: "dispatch@maconcaretransport.example",
-    phone: "(478) 555-0256", program: "CCSP", status: "ACKNOWLEDGED", age: 9,
+    phone: "(478) 555-0256", programs: ["CCSP"], status: "ACKNOWLEDGED", age: 9,
     businessName: "Macon Care Transport", contactName: "Gloria Estrada",
   },
   {
     type: "VENDOR", name: "Kwame Adjei", email: "hello@piedmontnutrition.example",
-    phone: "(770) 555-0260", program: "COMP", status: "RECEIVED", age: 4,
+    phone: "(770) 555-0260", programs: ["COMP"], status: "RECEIVED", age: 4,
     businessName: "Piedmont Nutrition Services", contactName: "Kwame Adjei",
   },
 ];
@@ -372,7 +372,7 @@ async function main() {
       data: {
         refId,
         type: seed.type,
-        program: seed.program,
+        programs: { create: seed.programs.map((program) => ({ program })) },
         status: seed.status,
         name: seed.name,
         email: seed.email,

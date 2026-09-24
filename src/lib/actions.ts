@@ -32,7 +32,8 @@ export async function setActingUser(formData: FormData) {
 
 export type EnrollmentInput = {
   type: string;
-  program: string;
+  /** One or more waiver programs; at least one is required. */
+  programs: string[];
   name: string;
   email: string;
   phone?: string;
@@ -53,9 +54,10 @@ export type CreatedEnrollment = {
 export async function createEnrollment(input: EnrollmentInput): Promise<CreatedEnrollment> {
   const type = input.type as EnrolleeType;
   if (!ENROLLEE_TYPES.includes(type)) throw new Error("Unknown enrollee type.");
-  if (!(PROGRAMS as readonly string[]).includes(input.program)) {
-    throw new Error("Pick a waiver program.");
-  }
+  const programs = Array.from(new Set(input.programs ?? [])).filter((program) =>
+    (PROGRAMS as readonly string[]).includes(program),
+  );
+  if (programs.length === 0) throw new Error("Pick at least one waiver program.");
 
   const name = input.name.trim();
   const email = input.email.trim().toLowerCase();
@@ -82,7 +84,7 @@ export async function createEnrollment(input: EnrollmentInput): Promise<CreatedE
     data: {
       refId,
       type,
-      program: input.program,
+      programs: { create: programs.map((program) => ({ program })) },
       status: "RECEIVED",
       name,
       email,

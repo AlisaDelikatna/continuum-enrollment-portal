@@ -38,8 +38,6 @@ model Enrollment {
   id          String   @id @default(cuid())
   /// EMPLOYEE | VENDOR | PARTICIPANT
   type        String
-  /// COMP | NOW | CCSP | SOURCE | ICWP
-  program     String
   /// RECEIVED | ACKNOWLEDGED | IN_REVIEW | MISSING_INFO | PROCESSED | ACTIVE
   status      String   @default("RECEIVED")
 
@@ -69,11 +67,25 @@ model Enrollment {
 
   statusEvents StatusEvent[]
   documents    Document[]
+  /// An enrollee can be enrolled under more than one waiver program.
+  programs     EnrollmentProgram[]
 
   @@index([type])
   @@index([status])
-  @@index([program])
   @@index([repId])
+}
+
+/// One row per (enrollment, waiver program). Normalised rather than a delimited
+/// string so the enrollment dashboard can filter and group by program directly.
+model EnrollmentProgram {
+  id           String     @id @default(cuid())
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  /// COMP | NOW | CCSP | SOURCE | ICWP
+  program      String
+
+  @@unique([enrollmentId, program])
+  @@index([program])
 }
 
 /// One row per status transition. The enrollment dashboard reads these, so

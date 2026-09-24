@@ -1,10 +1,10 @@
 import { PROGRAM_LABELS, typeLabel, type Program } from "@/config/programs";
-import { formatDate } from "@/lib/enrollments";
+import { formatDate, programCodes } from "@/lib/enrollments";
 
 export type EnrollmentFactsInput = {
   refId: string;
   type: string;
-  program: string;
+  programs: { program: string }[];
   name: string;
   email: string;
   phone: string | null;
@@ -22,8 +22,15 @@ export function EnrollmentFacts({ enrollment }: { enrollment: EnrollmentFactsInp
     ["Enrollment ID", <span key="refId" className="font-mono">{enrollment.refId}</span>],
     ["Enrollee type", typeLabel(enrollment.type)],
     [
-      "Program",
-      PROGRAM_LABELS[enrollment.program as Program] ?? enrollment.program,
+      programCodes(enrollment).length === 1 ? "Program" : "Programs",
+      <span key="programs" className="space-y-0.5 block">
+        {programCodes(enrollment).map((code) => (
+          <span key={code} className="block">
+            {PROGRAM_LABELS[code as Program] ?? code}
+          </span>
+        ))}
+        {programCodes(enrollment).length === 0 && <span>—</span>}
+      </span>,
     ],
     ["Submitted", formatDate(enrollment.createdAt)],
     ["Name", enrollment.name],

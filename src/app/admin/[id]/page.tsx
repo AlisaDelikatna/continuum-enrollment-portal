@@ -11,7 +11,7 @@ import { UploadForm } from "@/components/UploadForm";
 import { documentsFor } from "@/config/documents";
 import { typeLabel } from "@/config/programs";
 import { prisma } from "@/lib/db";
-import { documentProgress, missingDocuments } from "@/lib/enrollments";
+import { documentProgress, missingDocuments, programList } from "@/lib/enrollments";
 import { getActingUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +36,7 @@ export default async function AdminDetailPage(props: PageProps<"/admin/[id]">) {
   const enrollment = await prisma.enrollment.findUnique({
     where: { id },
     include: {
+      programs: { select: { program: true } },
       rep: { select: { id: true, name: true, email: true } },
       documents: {
         orderBy: { createdAt: "desc" },
@@ -94,7 +95,7 @@ export default async function AdminDetailPage(props: PageProps<"/admin/[id]">) {
           </div>
           <p className="mt-1 text-sm text-slate-600">
             <span className="font-mono">{enrollment.refId}</span> ·{" "}
-            {typeLabel(enrollment.type)} · {enrollment.program} waiver
+            {typeLabel(enrollment.type)} · {programList(enrollment)}
           </p>
         </div>
       </div>

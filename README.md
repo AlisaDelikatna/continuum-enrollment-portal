@@ -53,7 +53,8 @@ Submitting a new enrollment automatically signs you in as that new enrollee.
 
 1. **Enroll as a new employee** — go to `/enroll`.
    - Step 1: pick **Employee**.
-   - Step 2: fill in the form. In *Representative email* type
+   - Step 2: fill in the form. Tick **more than one waiver program** — an
+     enrollee can be enrolled under several. In *Representative email* type
      `priya.raman@continuumfiscal.example` — an existing rep, so the new record
      is linked to her automatically.
    - Step 3: attach a file to one or two slots, or press **Skip for now**.
@@ -92,12 +93,12 @@ timestamped row.
 
 | Route         | Who          | What                                                                    |
 | ------------- | ------------ | ----------------------------------------------------------------------- |
-| `/`           | Anyone       | Landing page with pipeline counts and links                              |
+| `/`           | Anyone       | Role-aware landing: intake path when signed out, your own numbers when in |
 | `/enroll`     | Public       | Three-step intake: type → form → documents → confirmation                |
 | `/me`         | Enrollees    | Status timeline, notes, document checklist, upload                       |
 | `/rep`        | Reps         | Their employees with status badges; detail view with upload              |
 | `/admin`      | Admin staff  | All enrollees, filters, status changes with notes, rep assignment, digest |
-| `/outbox`     | Anyone       | Every generated email, filterable by kind                                |
+| `/outbox`     | Admin staff  | Every generated email, filterable by kind                                |
 
 ---
 
@@ -151,6 +152,11 @@ so prefer adding a new entry. `required: false` entries are excluded from the
 
 Programs live in `src/config/programs.ts`, statuses in `src/config/statuses.ts`.
 
+An enrollment can carry any number of waiver programs. They are stored one row
+per `(enrollment, program)` in `EnrollmentProgram` rather than as a delimited
+string, so the admin filter and any dashboard query can filter and group by
+program directly.
+
 ---
 
 ## Stack and layout
@@ -174,12 +180,26 @@ src/
     storage.ts       disk writes for /uploads
 ```
 
+## Who sees what
+
+| Surface                    | Signed out | Enrollee        | Rep                  | Admin |
+| -------------------------- | ---------- | --------------- | -------------------- | ----- |
+| Landing page numbers       | none       | their record    | their caseload       | all   |
+| `/me`                      | —          | own record only | —                    | —     |
+| `/rep`, `/rep/[id]`        | —          | —               | own employees only   | —     |
+| `/admin`, `/admin/[id]`    | —          | —               | —                    | all   |
+| `/outbox`                  | —          | —               | —                    | all   |
+
+The outbox is the system-wide notification log — it holds every enrollee's name,
+address and status notes — so it is admin-only. A rep must not read participant
+or vendor correspondence.
+
 ## Known shortcuts (deliberate, for the demo)
 
 - No authentication. The role switcher is the login, and any visitor can pick
-  any user. Server actions do check the acting user's role, so a rep cannot
-  upload for someone else's employee — but that check is only as strong as the
-  cookie.
+  any user. Every page and server action does check the acting user's role, so a
+  rep cannot open another rep's employee or upload on their behalf — but that
+  check is only as strong as the cookie.
 - `/api/documents/[id]` serves any uploaded file to anyone who has the id.
 - Uploads are not scanned, size-limited or type-restricted.
 - Sending email is stubbed entirely; wiring a real provider means replacing the

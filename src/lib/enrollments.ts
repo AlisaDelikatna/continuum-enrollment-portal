@@ -1,5 +1,5 @@
 import { documentsFor } from "../config/documents";
-import type { EnrolleeType } from "../config/programs";
+import { PROGRAMS, type EnrolleeType } from "../config/programs";
 import { prisma } from "./db";
 
 const TYPE_PREFIX: Record<EnrolleeType, string> = {
@@ -63,4 +63,23 @@ export function formatDate(date: Date) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+/* ------------------------------------------------------------------ */
+/* Waiver programs (an enrollment can carry more than one)             */
+/* ------------------------------------------------------------------ */
+
+export type WithPrograms = { programs: { program: string }[] };
+
+/** Program codes in the canonical config order, not insertion order. */
+export function programCodes(enrollment: WithPrograms): string[] {
+  const order = PROGRAMS as readonly string[];
+  return enrollment.programs
+    .map((p) => p.program)
+    .sort((a, b) => order.indexOf(a) - order.indexOf(b));
+}
+
+export function programList(enrollment: WithPrograms): string {
+  const codes = programCodes(enrollment);
+  return codes.length > 0 ? codes.join(", ") : "—";
 }

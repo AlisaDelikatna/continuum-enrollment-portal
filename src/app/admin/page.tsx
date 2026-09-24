@@ -7,7 +7,7 @@ import { typeLabel } from "@/config/programs";
 import { STATUSES, statusLabel } from "@/config/statuses";
 import { prisma } from "@/lib/db";
 import { dayBounds } from "@/lib/email";
-import { documentProgress, formatDate } from "@/lib/enrollments";
+import { documentProgress, formatDate, programList } from "@/lib/enrollments";
 import { getActingUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +43,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
   };
   const where = {
     ...(filters.type ? { type: filters.type } : {}),
-    ...(filters.program ? { program: filters.program } : {}),
+    ...(filters.program ? { programs: { some: { program: filters.program } } } : {}),
     ...(filters.status ? { status: filters.status } : {}),
     ...(filters.q
       ? {
@@ -65,6 +65,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
       where,
       orderBy: { createdAt: "desc" },
       include: {
+        programs: { select: { program: true } },
         rep: { select: { name: true } },
         documents: { select: { docKey: true } },
         statusEvents: { orderBy: { createdAt: "desc" }, take: 1, select: { createdAt: true } },
@@ -131,7 +132,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
               <tr>
                 <th className="table-head">Enrollee</th>
                 <th className="table-head">Type</th>
-                <th className="table-head">Program</th>
+                <th className="table-head">Programs</th>
                 <th className="table-head">Status</th>
                 <th className="table-head">Rep</th>
                 <th className="table-head">Docs</th>
@@ -159,7 +160,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
                       </span>
                     </td>
                     <td className="table-cell">{typeLabel(enrollment.type)}</td>
-                    <td className="table-cell">{enrollment.program}</td>
+                    <td className="table-cell">{programList(enrollment)}</td>
                     <td className="table-cell">
                       <StatusBadge status={enrollment.status} size="sm" />
                     </td>

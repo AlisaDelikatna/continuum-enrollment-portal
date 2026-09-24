@@ -42,6 +42,7 @@ export default async function MePage() {
     where: { enrolleeId: actor.id },
     orderBy: { createdAt: "desc" },
     include: {
+      programs: { select: { program: true } },
       rep: { select: { name: true, email: true } },
       documents: {
         orderBy: { createdAt: "desc" },

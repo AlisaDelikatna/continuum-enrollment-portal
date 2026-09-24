@@ -2,7 +2,7 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/StatusBadge";
 import { STATUSES, statusLabel } from "@/config/statuses";
 import { prisma } from "@/lib/db";
-import { documentProgress, formatDate } from "@/lib/enrollments";
+import { documentProgress, formatDate, programList } from "@/lib/enrollments";
 import { getActingUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +32,7 @@ export default async function RepPage() {
     where: { repId: actor.id, type: "EMPLOYEE" },
     orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     include: {
+      programs: { select: { program: true } },
       documents: { select: { docKey: true } },
       statusEvents: {
         orderBy: { createdAt: "desc" },
@@ -97,7 +98,7 @@ export default async function RepPage() {
               <tr>
                 <th className="table-head">Employee</th>
                 <th className="table-head">Participant</th>
-                <th className="table-head">Program</th>
+                <th className="table-head">Programs</th>
                 <th className="table-head">Status</th>
                 <th className="table-head">Documents</th>
                 <th className="table-head">Submitted</th>
@@ -125,7 +126,7 @@ export default async function RepPage() {
                       </span>
                     </td>
                     <td className="table-cell">{employee.participantName ?? "—"}</td>
-                    <td className="table-cell">{employee.program}</td>
+                    <td className="table-cell">{programList(employee)}</td>
                     <td className="table-cell">
                       <StatusBadge status={employee.status} size="sm" />
                     </td>
