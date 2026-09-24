@@ -153,9 +153,17 @@ checklist marks "Supplemental — keep for future use" are deliberately *not*
 collected: Payroll Calendar, Online Time Sheet Instructions, Information Update
 Form, Rate Sheet, Termination Form, Separation Notice, What It Costs You.
 
-The employee packet is 17 scanned pages with no extractable text, so the employee
-list still comes from the call notes and Shavauna's emails rather than from the
-form itself. It needs OCR or a manual read to confirm.
+Both lists now come from the packets' own checklists rather than from notes
+about them:
+
+- participant — "Fiscal Employer Agent Participant Enrollment Checklist",
+  page 4 of `2025 participant packet.pdf`
+- employee — "Fiscal Employer Agent Employee Enrollment Checklist", page 2 of
+  `2026 EMPLOYEE PACKET.pdf` (17 scanned pages, read by OCR)
+
+Each form inside a packet is its own slot, so an enrollee can return them
+piecemeal and staff see exactly which form is missing rather than one
+all-or-nothing "packet received".
 
 ```
 src/config/documents/employee.ts
@@ -169,10 +177,10 @@ already uploaded under the old key, so prefer adding a new entry.
 `required: false` entries are excluded from the "n of m required received"
 counts.
 
-- `programs` limits a requirement to particular waivers. The TB test and
-  physical is `["ICWP"]`, so an ICWP employee is asked for 12 documents and a
-  COMP employee for 11. The CCSP Cost Share Payment Agreement is `["CCSP"]`,
-  so a CCSP participant is asked for 13 and a COMP participant for 12.
+- `programs` limits a requirement to particular waivers. The CCSP Cost Share
+  Payment Agreement is `["CCSP"]`, so a CCSP participant is asked for 13
+  documents and a COMP participant for 12. (No employee requirement is currently
+  program-limited — see the TB test question below.)
 - `unconfirmed: true` marks a requirement that came from only a few source calls.
   It renders an amber **Unconfirmed** tag on the checklist. IRS 2678 and 8821
   currently carry it — confirm with a supervisor and clear the flag.
@@ -181,7 +189,8 @@ counts.
 
 | Item | Status |
 | ---- | ------ |
-| Whether a signed payroll schedule is collected back, or only sent out as reference | flagged `unconfirmed` — Continuum emails a pay schedule PDF to new employers |
+| ~~Is the payroll schedule collected back?~~ | **Resolved: no.** The employee checklist marks it "Supplemental Form (keep for future use)". Removed from intake |
+| Are the TB test and physical required for everyone, or ICWP only? | The packet checklist lists both for every employee; the call notes say ICWP only. Kept required for all and flagged `unconfirmed` |
 | Is the general Power of Attorney submitted? | The packet checklist lists it; the agent call notes say discard it. Kept as required and flagged `unconfirmed` |
 | Who completes the DOL Employer Status Report? | On the packet checklist as a submitted form; the call notes say Continuum handles DOL registration. Kept and flagged `unconfirmed` |
 | ~~`enrollment@` vs `enrollments@`~~ | **Resolved: `enrollments@continuumfs.com`** (plural), per the Continuum signature block in two of Shavauna's emails, 30 Jul and 26 Aug 2026 |
