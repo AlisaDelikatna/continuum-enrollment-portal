@@ -102,6 +102,32 @@ timestamped row.
 
 ---
 
+## Blank forms
+
+`public/forms/` holds the real Continuum packets, listed in
+`src/config/packets.ts` per enrollee type. They appear in three places:
+
+- step 3 of the enrollment flow, above the upload slots
+- `/me`, so an enrollee can get them back at any time
+- the enrollment confirmation email in `/outbox`, as links
+
+This is the **"INTEREST IN CONTINUUM"** package — the blank forms, sent when
+someone first enquires. It is deliberately *not* the good-to-serve / Good to Go
+welcome package, which goes out only after approval and carries portal
+credentials, pay rules and EVV instructions.
+
+For reference, what triggers each email in current operations:
+
+| Email | Recipient | Trigger |
+| ----- | --------- | ------- |
+| INTEREST IN CONTINUUM | prospect / rep | someone expresses interest |
+| Fingerprint Instructions | employee, rep CC'd | employee packet received **complete** |
+| Good to Go | employee, employer CC'd | background check returns **eligible**, within 24–48h; carries portal credentials |
+| GOOD TO SERVE | participant | notarized RD-1061, ICD-10 code, training certificate **and an active PA/budget visible in GAMMIS** |
+
+Only the first is modelled. The portal's own status-change emails are a separate
+mechanism from these four.
+
 ## Statuses
 
 `Received → Acknowledged → In review → Missing info → Processed → Active`

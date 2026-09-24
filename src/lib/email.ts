@@ -1,5 +1,6 @@
 import { statusLabel } from "../config/statuses";
 import { typeLabel } from "../config/programs";
+import { KIND_LABELS, packetFor } from "../config/packets";
 import { prisma } from "./db";
 import { programList } from "./enrollments";
 
@@ -68,6 +69,7 @@ async function loadEnrollment(enrollmentId: string) {
       type: true,
       name: true,
       email: true,
+      type: true,
       programs: { select: { program: true } },
       repEmailRaw: true,
       rep: { select: { name: true, email: true } },
@@ -150,6 +152,7 @@ export async function sendEnrollmentReceivedEmail(enrollmentId: string) {
     `Current status: ${statusLabel("RECEIVED")}`,
     "",
     "Packets are reviewed first-in, first-out — allow 24–48 business hours, longer during payroll week. You can upload any remaining documents at any time from your status page.",
+    ...packetLines(enrollment.type),
     "",
     `Status page: ${PORTAL_URL}/me`,
     signature(),
@@ -162,6 +165,25 @@ export async function sendEnrollmentReceivedEmail(enrollmentId: string) {
     kind: "ENROLLMENT_RECEIVED",
     enrollmentRef: enrollment.refId,
   });
+}
+
+/**
+ * The blank forms to print and fill, listed in the confirmation email. This is
+ * the "INTEREST IN CONTINUUM" package — not the good-to-serve welcome package,
+ * which only goes out once the enrollment is approved.
+ */
+function packetLines(type: string): string[] {
+  const forms = packetFor(type);
+  if (forms.length === 0) return [];
+  return [
+    "",
+    "YOUR FORMS — print, complete and upload:",
+    ...forms.flatMap((form) => [
+      "",
+      `• ${form.label} — ${KIND_LABELS[form.kind]}`,
+      `    ${PORTAL_URL}${form.file}`,
+    ]),
+  ];
 }
 
 /* ------------------------------------------------------------------ */

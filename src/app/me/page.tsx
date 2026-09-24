@@ -2,6 +2,7 @@ import Link from "next/link";
 import { DocumentChecklist } from "@/components/DocumentChecklist";
 import { EnrollmentFacts } from "@/components/EnrollmentFacts";
 import { MissingInfoBanner } from "@/components/MissingInfoBanner";
+import { PacketDownloads } from "@/components/PacketDownloads";
 import { StatusBadge } from "@/components/StatusBadge";
 import { StatusProgress, StatusTimeline } from "@/components/StatusTimeline";
 import { UploadForm } from "@/components/UploadForm";
@@ -130,6 +131,16 @@ export default async function MePage() {
                     programs={codes}
                   />
                 </div>
+                <div className="mt-6 border-t border-slate-100 pt-5">
+                  <h3 className="text-sm font-semibold text-slate-900">
+                    Blank forms to print
+                  </h3>
+                  <p className="mt-1 mb-3 text-xs text-slate-500">
+                    The same package we emailed you. Print, complete, then upload below.
+                  </p>
+                  <PacketDownloads type={enrollment.type} />
+                </div>
+
                 <div className="mt-6 border-t border-slate-100 pt-5">
                   <h3 className="text-sm font-semibold text-slate-900">Upload a document</h3>
                   <p className="mt-1 mb-4 text-xs text-slate-500">

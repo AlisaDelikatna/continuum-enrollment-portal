@@ -15,6 +15,7 @@ import {
   type EnrolleeType,
 } from "@/config/programs";
 import { createEnrollment, uploadDocuments, type CreatedEnrollment } from "@/lib/actions";
+import { PacketDownloads } from "./PacketDownloads";
 import { StatusBadge } from "./StatusBadge";
 
 const STEPS = ["Enrollee type", "Your details", "Documents", "Confirmation"];
@@ -303,12 +304,24 @@ export function EnrollWizard() {
       {step === 2 && created && type && (
         <section className="mt-6">
           <h2 className="text-lg font-semibold text-slate-900">
-            Upload your documents
+            Your forms
           </h2>
           <p className="mt-1 text-sm text-slate-600">
             Enrollment <span className="font-mono font-semibold">{created.refId}</span>{" "}
-            is saved. Attach what you have now — anything you skip can be uploaded
-            later from your status page.
+            is saved, and these forms are on their way to your email too. Print
+            them, fill them in, then upload the completed pages below — now or any
+            time from your status page.
+          </p>
+
+          <div className="mt-4 card card-pad">
+            <PacketDownloads type={created.type} />
+          </div>
+
+          <h3 className="mt-8 text-lg font-semibold text-slate-900">
+            Upload completed documents
+          </h3>
+          <p className="mt-1 text-sm text-slate-600">
+            Nothing here is required to finish — you can come back later.
           </p>
 
           <form
