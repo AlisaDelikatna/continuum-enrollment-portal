@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/StatusBadge";
-import { STATUSES, statusLabel } from "@/config/statuses";
+import { pipelineFor } from "@/config/statuses";
 import { prisma } from "@/lib/db";
 import { documentProgress, formatDate, programCodes, programList } from "@/lib/enrollments";
 import { getActingUser } from "@/lib/session";
@@ -80,13 +80,16 @@ export default async function RepPage() {
       )}
 
       <div className="mt-6 flex flex-wrap gap-2">
-        {STATUSES.map((status) => (
+        {pipelineFor("EMPLOYEE").map((step) => (
           <span
-            key={status}
+            key={step.key}
+            title={step.description}
             className="rounded-full bg-white px-3 py-1 text-xs text-slate-600 ring-1 ring-inset ring-slate-200"
           >
-            {statusLabel(status)}{" "}
-            <span className="font-semibold text-slate-900">{counts.get(status) ?? 0}</span>
+            {step.label}{" "}
+            <span className="font-semibold text-slate-900">
+              {counts.get(step.key) ?? 0}
+            </span>
           </span>
         ))}
       </div>

@@ -11,6 +11,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { documentsFor } from "../src/config/documents";
+import { legacyOf, pipelineFor } from "../src/config/statuses";
 import {
   sendDailyDigest,
   sendEnrollmentReceivedEmail,
@@ -108,13 +109,30 @@ const REPS = [
   { name: "Tanya Okonkwo", email: "tanya.okonkwo@continuumfiscal.example", phone: "(478) 555-0133" },
 ];
 
-type Status =
-  | "RECEIVED"
-  | "ACKNOWLEDGED"
-  | "IN_REVIEW"
-  | "MISSING_INFO"
-  | "PROCESSED"
-  | "ACTIVE";
+/** A status key from the enrollee type's own pipeline (src/config/statuses.ts). */
+type Status = string;
+
+/** Index into a type's pipeline, so seed rows stay readable across all three. */
+type Stage = "SENT" | "RECEIVED" | "REVIEW" | "MISSING" | "PENDING" | "DONE";
+
+/**
+ * Each type's pipeline has the same shape — three intake steps, a hold, then
+ * one or two type-specific steps before the final cleared state — so seed rows
+ * name a stage and we resolve it to that type's real status key.
+ */
+function statusFor(type: "EMPLOYEE" | "VENDOR" | "PARTICIPANT", stage: Stage): Status {
+  const steps = pipelineFor(type);
+  const forward = steps.filter((s) => !s.hold);
+  switch (stage) {
+    case "SENT": return forward[0].key;
+    case "RECEIVED": return forward[1].key;
+    case "REVIEW": return forward[2].key;
+    case "MISSING": return "MISSING_INFO";
+    // Employees have an extra step (fingerprints, then eligible) before the end.
+    case "PENDING": return forward[forward.length - 2].key;
+    case "DONE": return forward[forward.length - 1].key;
+  }
+}
 
 type SeedEnrollment = {
   type: "EMPLOYEE" | "VENDOR" | "PARTICIPANT";
@@ -122,7 +140,7 @@ type SeedEnrollment = {
   email: string;
   phone: string;
   programs: Array<"COMP" | "NOW" | "CCSP" | "SOURCE" | "ICWP">;
-  status: Status;
+  status: Stage;
   age: number;
   participantName?: string;
   relationship?: string;
@@ -140,66 +158,66 @@ const ENROLLMENTS: SeedEnrollment[] = [
   // ---- Employees -------------------------------------------------------
   {
     type: "EMPLOYEE", name: "Jordan Ellis", email: "jordan.ellis@example.com",
-    phone: "(404) 555-0143", programs: ["COMP", "NOW"], status: "ACTIVE", age: 96,
+    phone: "(404) 555-0143", programs: ["COMP", "NOW"], status: "DONE", age: 96,
     participantName: "Marcus Alvarado", relationship: "Son", repIndex: 0, detour: true,
   },
   {
     type: "EMPLOYEE", name: "Alicia Ferrer", email: "alicia.ferrer@example.com",
-    phone: "(404) 555-0147", programs: ["NOW"], status: "IN_REVIEW", age: 12,
+    phone: "(404) 555-0147", programs: ["NOW"], status: "REVIEW", age: 12,
     participantName: "Dee Whitmore", relationship: "No relation", repIndex: 0, uploadsToday: 1,
   },
   {
     type: "EMPLOYEE", name: "Samuel Otieno", email: "samuel.otieno@example.com",
-    phone: "(770) 555-0151", programs: ["CCSP"], status: "MISSING_INFO", age: 21,
+    phone: "(770) 555-0151", programs: ["CCSP"], status: "MISSING", age: 21,
     participantName: "Harold Pryce", relationship: "Nephew", repIndex: 0,
     missingNote:
       "Page 2 of the Form I-9 is unsigned, and the supporting photo ID was cut off in the scan. Please re-upload both. We also still need the Georgia Form G-4.",
   },
   {
     type: "EMPLOYEE", name: "Bianca Ruiz", email: "bianca.ruiz@example.com",
-    phone: "(478) 555-0158", programs: ["SOURCE"], status: "ACKNOWLEDGED", age: 6,
+    phone: "(478) 555-0158", programs: ["SOURCE"], status: "RECEIVED", age: 6,
     participantName: "Nina Castellano", relationship: "Daughter", repIndex: 1,
   },
   {
     type: "EMPLOYEE", name: "Derrick Hale", email: "derrick.hale@example.com",
-    phone: "(404) 555-0162", programs: ["ICWP"], status: "PROCESSED", age: 44,
+    phone: "(404) 555-0162", programs: ["ICWP"], status: "PENDING", age: 44,
     participantName: "Roy Sandiford", relationship: "No relation", repIndex: 1,
   },
   {
     type: "EMPLOYEE", name: "Keisha Moreland", email: "keisha.moreland@example.com",
-    phone: "(770) 555-0169", programs: ["COMP", "SOURCE"], status: "ACTIVE", age: 130,
+    phone: "(770) 555-0169", programs: ["COMP", "SOURCE"], status: "DONE", age: 130,
     participantName: "Marcus Alvarado", relationship: "Sister", repIndex: 1,
   },
   {
     type: "EMPLOYEE", name: "Tomas Vega", email: "tomas.vega@example.com",
-    phone: "(478) 555-0174", programs: ["NOW"], status: "RECEIVED", age: 2,
+    phone: "(478) 555-0174", programs: ["NOW"], status: "SENT", age: 2,
     participantName: "Elaine Dorsey", relationship: "No relation", repIndex: 2, uploadsToday: 1,
   },
   {
     type: "EMPLOYEE", name: "Hannah Wexler", email: "hannah.wexler@example.com",
-    phone: "(404) 555-0180", programs: ["CCSP", "SOURCE"], status: "MISSING_INFO", age: 30,
+    phone: "(404) 555-0180", programs: ["CCSP", "SOURCE"], status: "MISSING", age: 30,
     participantName: "Grady Lutz", relationship: "Daughter", repIndex: 2,
     missingNote:
       "The background check consent form is missing a date next to the signature, and we have no direct deposit authorization on file. Paper checks will be issued until one is received.",
   },
   {
     type: "EMPLOYEE", name: "Omar Siddiqui", email: "omar.siddiqui@example.com",
-    phone: "(770) 555-0186", programs: ["SOURCE", "ICWP"], status: "IN_REVIEW", age: 17,
+    phone: "(770) 555-0186", programs: ["SOURCE", "ICWP"], status: "REVIEW", age: 17,
     participantName: "Nina Castellano", relationship: "No relation", repIndex: 2,
   },
   {
     type: "EMPLOYEE", name: "Rebecca Lindgren", email: "rebecca.lindgren@example.com",
-    phone: "(404) 555-0191", programs: ["ICWP"], status: "ACTIVE", age: 78,
+    phone: "(404) 555-0191", programs: ["ICWP"], status: "DONE", age: 78,
     participantName: "Roy Sandiford", relationship: "Wife", repIndex: 0,
   },
   {
     type: "EMPLOYEE", name: "Andre Coleman", email: "andre.coleman@example.com",
-    phone: "(478) 555-0195", programs: ["COMP"], status: "PROCESSED", age: 38,
+    phone: "(478) 555-0195", programs: ["COMP"], status: "PENDING", age: 38,
     participantName: "Harold Pryce", relationship: "No relation", repIndex: 1, detour: true,
   },
   {
     type: "EMPLOYEE", name: "Priscilla Nwosu", email: "priscilla.nwosu@example.com",
-    phone: "(770) 555-0199", programs: ["NOW"], status: "RECEIVED", age: 1,
+    phone: "(770) 555-0199", programs: ["NOW"], status: "SENT", age: 1,
     participantName: "Elaine Dorsey",
     repNameRaw: "T. Okonkwo", repEmailRaw: "t.okonkwo@example.com",
     uploadsToday: 1,
@@ -208,67 +226,67 @@ const ENROLLMENTS: SeedEnrollment[] = [
   // ---- Participants ----------------------------------------------------
   {
     type: "PARTICIPANT", name: "Marcus Alvarado", email: "marcus.alvarado@example.com",
-    phone: "(404) 555-0210", programs: ["COMP", "NOW"], status: "ACTIVE", age: 150,
+    phone: "(404) 555-0210", programs: ["COMP", "NOW"], status: "DONE", age: 150,
   },
   {
     type: "PARTICIPANT", name: "Nina Castellano", email: "nina.castellano@example.com",
-    phone: "(770) 555-0214", programs: ["SOURCE"], status: "IN_REVIEW", age: 19,
+    phone: "(770) 555-0214", programs: ["SOURCE"], status: "REVIEW", age: 19,
   },
   {
     type: "PARTICIPANT", name: "Harold Pryce", email: "harold.pryce@example.com",
-    phone: "(478) 555-0218", programs: ["CCSP"], status: "PROCESSED", age: 52,
+    phone: "(478) 555-0218", programs: ["CCSP"], status: "PENDING", age: 52,
   },
   {
     type: "PARTICIPANT", name: "Elaine Dorsey", email: "elaine.dorsey@example.com",
-    phone: "(404) 555-0223", programs: ["NOW"], status: "ACKNOWLEDGED", age: 8,
+    phone: "(404) 555-0223", programs: ["NOW"], status: "RECEIVED", age: 8,
   },
   {
     type: "PARTICIPANT", name: "Roy Sandiford", email: "roy.sandiford@example.com",
-    phone: "(770) 555-0227", programs: ["ICWP"], status: "ACTIVE", age: 115,
+    phone: "(770) 555-0227", programs: ["ICWP"], status: "DONE", age: 115,
   },
   {
     type: "PARTICIPANT", name: "Dee Whitmore", email: "dee.whitmore@example.com",
-    phone: "(478) 555-0231", programs: ["NOW"], status: "MISSING_INFO", age: 26,
+    phone: "(478) 555-0231", programs: ["NOW"], status: "MISSING", age: 26,
     missingNote:
       "IRS Form 2678 is signed but the employer identification number field is blank, so we cannot file it. Please re-upload a completed copy.",
   },
   {
     type: "PARTICIPANT", name: "Grady Lutz", email: "grady.lutz@example.com",
-    phone: "(404) 555-0235", programs: ["CCSP"], status: "RECEIVED", age: 3,
+    phone: "(404) 555-0235", programs: ["CCSP"], status: "SENT", age: 3,
   },
 
   // ---- Vendors ---------------------------------------------------------
   {
     type: "VENDOR", name: "Dana Whitfield", email: "ap@peachtreemobility.example",
-    phone: "(404) 555-0240", programs: ["COMP", "NOW", "CCSP"], status: "ACTIVE", age: 140,
+    phone: "(404) 555-0240", programs: ["COMP", "NOW", "CCSP"], status: "DONE", age: 140,
     businessName: "Peachtree Mobility Supply LLC", contactName: "Dana Whitfield",
   },
   {
     type: "VENDOR", name: "Leo Barnhart", email: "billing@savannahrespite.example",
-    phone: "(912) 555-0244", programs: ["SOURCE"], status: "IN_REVIEW", age: 15,
+    phone: "(912) 555-0244", programs: ["SOURCE"], status: "REVIEW", age: 15,
     businessName: "Savannah Respite Partners", contactName: "Leo Barnhart",
     uploadsToday: 1,
   },
   {
     type: "VENDOR", name: "Ruth Kellerman", email: "office@chattahoocheehomemods.example",
-    phone: "(706) 555-0248", programs: ["ICWP"], status: "MISSING_INFO", age: 33,
+    phone: "(706) 555-0248", programs: ["ICWP"], status: "MISSING", age: 33,
     businessName: "Chattahoochee Home Modifications", contactName: "Ruth Kellerman",
     missingNote:
       "The certificate of liability insurance on file expired last month. We need a current certificate before any invoices can be paid.",
   },
   {
     type: "VENDOR", name: "Vincent Moy", email: "vincent@athensadaptive.example",
-    phone: "(706) 555-0252", programs: ["NOW", "ICWP"], status: "PROCESSED", age: 41,
+    phone: "(706) 555-0252", programs: ["NOW", "ICWP"], status: "PENDING", age: 41,
     businessName: "Athens Adaptive Technology", contactName: "Vincent Moy",
   },
   {
     type: "VENDOR", name: "Gloria Estrada", email: "dispatch@maconcaretransport.example",
-    phone: "(478) 555-0256", programs: ["CCSP"], status: "ACKNOWLEDGED", age: 9,
+    phone: "(478) 555-0256", programs: ["CCSP"], status: "RECEIVED", age: 9,
     businessName: "Macon Care Transport", contactName: "Gloria Estrada",
   },
   {
     type: "VENDOR", name: "Kwame Adjei", email: "hello@piedmontnutrition.example",
-    phone: "(770) 555-0260", programs: ["COMP"], status: "RECEIVED", age: 4,
+    phone: "(770) 555-0260", programs: ["COMP"], status: "SENT", age: 4,
     businessName: "Piedmont Nutrition Services", contactName: "Kwame Adjei",
   },
 ];
@@ -277,42 +295,42 @@ const ENROLLMENTS: SeedEnrollment[] = [
 /* Status chains                                                       */
 /* ------------------------------------------------------------------ */
 
-const STATUS_NOTES: Record<Status, string> = {
-  RECEIVED: "Enrollment submitted through the public portal.",
-  ACKNOWLEDGED: "Packet logged by enrollment intake. Assigned to the review queue.",
-  IN_REVIEW: "Specialist reviewing submitted documents against the program checklist.",
-  MISSING_INFO: "Outstanding items requested from the enrollee.",
-  PROCESSED: "All documents verified and keyed into payroll and accounts payable.",
-  ACTIVE: "Setup complete. Cleared to begin services under the waiver program.",
+const STAGE_NOTES: Record<Stage, string> = {
+  SENT: "Enrollment submitted through the public portal. Blank packet issued.",
+  RECEIVED: "Completed packet received and logged. Queued first-in, first-out.",
+  REVIEW: "Specialist reviewing the packet against the checklist.",
+  MISSING: "Outstanding items requested from the enrollee; enrollment placed on hold.",
+  PENDING: "Paperwork cleared. Waiting on the last external step before sign-off.",
+  DONE: "Cleared. Portal access issued.",
 };
 
-function chainFor(target: Status, detour: boolean): Status[] {
-  const base: Record<Status, Status[]> = {
-    RECEIVED: ["RECEIVED"],
-    ACKNOWLEDGED: ["RECEIVED", "ACKNOWLEDGED"],
-    IN_REVIEW: ["RECEIVED", "ACKNOWLEDGED", "IN_REVIEW"],
-    MISSING_INFO: ["RECEIVED", "ACKNOWLEDGED", "IN_REVIEW", "MISSING_INFO"],
-    PROCESSED: ["RECEIVED", "ACKNOWLEDGED", "IN_REVIEW", "PROCESSED"],
-    ACTIVE: ["RECEIVED", "ACKNOWLEDGED", "IN_REVIEW", "PROCESSED", "ACTIVE"],
+function chainFor(target: Stage, detour: boolean): Stage[] {
+  const base: Record<Stage, Stage[]> = {
+    SENT: ["SENT"],
+    RECEIVED: ["SENT", "RECEIVED"],
+    REVIEW: ["SENT", "RECEIVED", "REVIEW"],
+    MISSING: ["SENT", "RECEIVED", "REVIEW", "MISSING"],
+    PENDING: ["SENT", "RECEIVED", "REVIEW", "PENDING"],
+    DONE: ["SENT", "RECEIVED", "REVIEW", "PENDING", "DONE"],
   };
   const chain = [...base[target]];
   if (detour && chain.length > 3) {
     // A record that went out for missing info and came back.
-    chain.splice(3, 0, "MISSING_INFO", "IN_REVIEW");
+    chain.splice(3, 0, "MISSING", "REVIEW");
   }
   return chain;
 }
 
 /** How many required documents are on file at each stage. */
-function documentCountFor(status: Status, total: number) {
-  switch (status) {
-    case "RECEIVED":
+function documentCountFor(stage: Stage, total: number) {
+  switch (stage) {
+    case "SENT":
       return Math.min(1, total);
-    case "ACKNOWLEDGED":
+    case "RECEIVED":
       return Math.ceil(total / 2);
-    case "IN_REVIEW":
+    case "REVIEW":
       return Math.max(total - 1, 1);
-    case "MISSING_INFO":
+    case "MISSING":
       return Math.max(total - 2, 1);
     default:
       return total;
@@ -374,7 +392,8 @@ async function main() {
         refId,
         type: seed.type,
         programs: { create: seed.programs.map((program) => ({ program })) },
-        status: seed.status,
+        status: statusFor(seed.type, seed.status),
+        legacyStatus: legacyOf(statusFor(seed.type, seed.status)),
         name: seed.name,
         email: seed.email,
         phone: seed.phone,
@@ -397,19 +416,17 @@ async function main() {
     const stepMs = spanMs / (chain.length + 1);
 
     for (let index = 0; index < chain.length; index++) {
-      const status = chain[index];
+      const stage = chain[index];
+      const status = statusFor(seed.type, stage);
       const at = new Date(createdAt.getTime() + stepMs * index);
       const isLatestMissing =
-        status === "MISSING_INFO" && index === chain.length - 1 && seed.missingNote;
+        stage === "MISSING" && index === chain.length - 1 && seed.missingNote;
       await prisma.statusEvent.create({
         data: {
           enrollmentId: enrollment.id,
           status,
-          note: isLatestMissing
-            ? seed.missingNote
-            : status === "MISSING_INFO"
-              ? "Items requested from the enrollee; enrollment placed on hold."
-              : STATUS_NOTES[status],
+          legacyStatus: legacyOf(status),
+          note: isLatestMissing ? seed.missingNote : STAGE_NOTES[stage],
           changedById: index === 0 ? enrollee.id : admin.id,
           createdAt: at,
         },
@@ -423,7 +440,7 @@ async function main() {
     const howMany = documentCountFor(seed.status, required.filter((d) => d.required).length);
     const requiredDocs = required.filter((d) => d.required).slice(0, howMany);
     const optionalDoc =
-      seed.status === "ACTIVE" || seed.status === "PROCESSED"
+      seed.status === "DONE" || seed.status === "PENDING"
         ? required.find((d) => !d.required)
         : undefined;
     const toUpload = optionalDoc ? [...requiredDocs, optionalDoc] : requiredDocs;
@@ -450,7 +467,7 @@ async function main() {
       const uploader =
         seed.type === "EMPLOYEE" && rep && index % 3 === 2
           ? rep
-          : index === 0 && seed.status === "ACTIVE"
+          : index === 0 && seed.status === "DONE"
             ? admin
             : enrollee;
 
@@ -479,12 +496,13 @@ async function main() {
       });
     }
 
-    const latest = chain[chain.length - 1];
-    if (latest !== "RECEIVED") {
+    const latestStage = chain[chain.length - 1];
+    const latest = statusFor(seed.type, latestStage);
+    if (latestStage !== "SENT") {
       const note =
-        latest === "MISSING_INFO" && seed.missingNote
+        latestStage === "MISSING" && seed.missingNote
           ? seed.missingNote
-          : STATUS_NOTES[latest];
+          : STAGE_NOTES[latestStage];
       const email = await sendStatusChangeEmail({
         enrollmentId: enrollment.id,
         status: latest,

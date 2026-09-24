@@ -104,7 +104,7 @@ export default async function AdminDetailPage(props: PageProps<"/admin/[id]">) {
       </div>
 
       <div className="card card-pad">
-        <StatusProgress current={enrollment.status} />
+        <StatusProgress current={enrollment.status} type={enrollment.type} />
       </div>
 
       {missing?.note && (
@@ -167,6 +167,7 @@ export default async function AdminDetailPage(props: PageProps<"/admin/[id]">) {
             <h2 className="section-title mb-4">Change status</h2>
             <StatusChangeForm
               enrollmentId={enrollment.id}
+              enrolleeType={enrollment.type}
               currentStatus={enrollment.status}
               recipientsHint={recipientsHint}
             />

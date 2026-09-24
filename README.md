@@ -143,16 +143,49 @@ mechanism from these four.
 
 ## Statuses
 
-`Received → Acknowledged → In review → Missing info → Processed → Active`
+Employees, participants and vendors do not move through the same steps, so each
+type has its own pipeline (`src/config/statuses.ts`), drawn from how Continuum
+actually works:
 
-Every change writes a row to `StatusEvent` with the new status, the timestamp,
-the user who made it and the note. Nothing is overwritten, and the table is
-indexed on `(enrollmentId, createdAt)`, `(status, createdAt)` and `createdAt`
-so the existing enrollment dashboard can query time-in-status directly.
+| | Pipeline |
+| --- | --- |
+| **Employee** | Packet sent → Packet received → In review → *Missing info* → Fingerprints pending → Background check eligible → **Good to go** |
+| **Participant** | Packet sent → Packet received → In review → *Missing info* → Awaiting PA in GAMMIS → **Good to serve** |
+| **Vendor** | Packet sent → Packet received → In review → *Missing info* → Awaiting DBHDD approval → **Approved vendor** |
 
-**Missing info** requires a note. That note is shown prominently — an amber
-banner at the top of the enrollee's status page, a callout on the rep's list,
-and a `WHAT WE STILL NEED` block in the email.
+*Missing info* is a hold rather than a forward step: it sits off the progress
+strip, which shows where the record stalled.
+
+Two steps carry the constraints that actually block records:
+
+- **Awaiting PA in GAMMIS** — Continuum cannot load a prior authorisation from
+  an email. No start date is promised until it is visible in GAMMIS.
+- **Fingerprints pending** — the employee cannot work, use EVV, enter time or
+  be paid until Good to go lands.
+
+### The existing dashboard keeps working
+
+The original brief specified six generic statuses whose timestamps feed an
+existing dashboard. Every pipeline status maps to one of those six, and **both**
+values are written to the `Enrollment` row and to every `StatusEvent`:
+
+| Legacy stage | Pipeline statuses that roll up to it |
+| --- | --- |
+| Received | Packet sent |
+| Acknowledged | Packet received |
+| In review | In review |
+| Missing info | Missing info |
+| Processed | Fingerprints pending · Background check eligible · Awaiting PA · Awaiting DBHDD approval |
+| Active | Good to go · Good to serve · Approved vendor |
+
+`legacyStatus` is indexed on both tables, so existing queries keep working
+untouched while the portal shows the real vocabulary. The admin and landing page
+tiles roll up to the six; the per-record views show the real steps.
+
+Every change writes a `StatusEvent` row with both statuses, the timestamp, the
+user who made it and the note. Nothing is overwritten. **Missing info** requires
+a note, shown as an amber banner on the enrollee's status page, a callout on the
+rep's list, and a `WHAT WE STILL NEED` block in the email.
 
 ## Email rules
 

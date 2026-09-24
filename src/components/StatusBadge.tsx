@@ -1,4 +1,4 @@
-import { STATUS_STYLES, statusLabel, type Status } from "@/config/statuses";
+import { STATUS_STYLES, statusLabel } from "@/config/statuses";
 
 export function StatusBadge({
   status,
@@ -7,8 +7,7 @@ export function StatusBadge({
   status: string;
   size?: "sm" | "md";
 }) {
-  const style =
-    STATUS_STYLES[status as Status] ?? "bg-slate-100 text-slate-700 ring-slate-200";
+  const style = STATUS_STYLES[status] ?? "bg-slate-100 text-slate-700 ring-slate-200";
   return (
     <span
       className={`inline-flex items-center whitespace-nowrap rounded-full font-semibold ring-1 ring-inset ${style} ${

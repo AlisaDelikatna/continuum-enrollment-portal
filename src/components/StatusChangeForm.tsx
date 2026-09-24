@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { STATUSES, statusLabel } from "@/config/statuses";
+import { pipelineFor } from "@/config/statuses";
 import { changeStatus, type ActionState } from "@/lib/actions";
 
 /**
@@ -10,10 +10,12 @@ import { changeStatus, type ActionState } from "@/lib/actions";
  */
 export function StatusChangeForm({
   enrollmentId,
+  enrolleeType,
   currentStatus,
   recipientsHint,
 }: {
   enrollmentId: string;
+  enrolleeType: string;
   currentStatus: string;
   recipientsHint: string;
 }) {
@@ -23,7 +25,8 @@ export function StatusChangeForm({
   );
   const [selected, setSelected] = useState(currentStatus);
 
-  const nextIndex = STATUSES.indexOf(currentStatus as (typeof STATUSES)[number]);
+  const steps = pipelineFor(enrolleeType);
+  const nextIndex = steps.findIndex((s) => s.key === currentStatus);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -31,35 +34,44 @@ export function StatusChangeForm({
 
       <div>
         <span className="label">New status</span>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {STATUSES.map((status, index) => (
+        <div className="grid gap-2">
+          {steps.map((step, index) => (
             <label
-              key={status}
-              className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm ring-1 ring-inset transition ${
-                selected === status
-                  ? "bg-brand-50 text-brand-800 ring-brand-400 font-semibold"
+              key={step.key}
+              className={`flex cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2.5 text-sm ring-1 ring-inset transition ${
+                selected === step.key
+                  ? "bg-brand-50 text-brand-900 ring-brand-400"
                   : "bg-white text-slate-700 ring-slate-200 hover:bg-slate-50"
               }`}
             >
               <input
                 type="radio"
                 name="status"
-                value={status}
-                checked={selected === status}
-                onChange={() => setSelected(status)}
-                className="h-4 w-4 accent-[#0f6d64]"
+                value={step.key}
+                checked={selected === step.key}
+                onChange={() => setSelected(step.key)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[#0f6d64]"
               />
-              <span>{statusLabel(status)}</span>
-              {status === currentStatus && (
-                <span className="ml-auto text-[11px] uppercase tracking-wide text-slate-400">
-                  Current
+              <span className="min-w-0 flex-1">
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className={selected === step.key ? "font-semibold" : "font-medium"}>
+                    {step.label}
+                  </span>
+                  {step.key === currentStatus && (
+                    <span className="text-[11px] uppercase tracking-wide text-slate-400">
+                      Current
+                    </span>
+                  )}
+                  {index === nextIndex + 1 && step.key !== currentStatus && (
+                    <span className="text-[11px] uppercase tracking-wide text-brand-500">
+                      Next
+                    </span>
+                  )}
                 </span>
-              )}
-              {index === nextIndex + 1 && status !== currentStatus && (
-                <span className="ml-auto text-[11px] uppercase tracking-wide text-brand-500">
-                  Next
+                <span className="mt-0.5 block text-xs text-slate-500">
+                  {step.description}
                 </span>
-              )}
+              </span>
             </label>
           ))}
         </div>

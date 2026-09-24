@@ -82,7 +82,7 @@ export default async function RepEmployeePage(props: PageProps<"/rep/[id]">) {
       </div>
 
       <div className="card card-pad">
-        <StatusProgress current={enrollment.status} />
+        <StatusProgress current={enrollment.status} type={enrollment.type} />
       </div>
 
       {missing?.note && (

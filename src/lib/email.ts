@@ -69,7 +69,6 @@ async function loadEnrollment(enrollmentId: string) {
       type: true,
       name: true,
       email: true,
-      type: true,
       programs: { select: { program: true } },
       repEmailRaw: true,
       rep: { select: { name: true, email: true } },

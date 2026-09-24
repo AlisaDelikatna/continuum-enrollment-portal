@@ -2,7 +2,7 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/StatusBadge";
 import { documentsFor } from "@/config/documents";
 import { ENROLLEE_TYPES, TYPE_BLURBS, TYPE_LABELS } from "@/config/programs";
-import { STATUSES, statusLabel } from "@/config/statuses";
+import { LEGACY_LABELS, LEGACY_STATUSES, PIPELINES } from "@/config/statuses";
 import { prisma } from "@/lib/db";
 import { documentProgress, formatDate, programCodes, programList } from "@/lib/enrollments";
 import { getActingUser, type ActingUser } from "@/lib/session";
@@ -92,19 +92,34 @@ function PublicLanding() {
 
       <section className="mt-10 card card-pad">
         <h2 className="section-title">What happens after you apply</h2>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          {STATUSES.map((status, index) => (
-            <span key={status} className="flex items-center gap-2">
-              <StatusBadge status={status} />
-              {index < STATUSES.length - 1 && (
-                <span aria-hidden className="text-slate-300">
-                  →
-                </span>
-              )}
-            </span>
+        <p className="mt-2 text-sm text-slate-600">
+          Each kind of enrollment follows its own path. Yours will look like one
+          of these.
+        </p>
+        <div className="mt-4 space-y-4">
+          {ENROLLEE_TYPES.map((type) => (
+            <div key={type}>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                {TYPE_LABELS[type]}
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {PIPELINES[type]
+                  .filter((step) => !step.hold)
+                  .map((step, index, all) => (
+                    <span key={step.key} className="flex items-center gap-2">
+                      <StatusBadge status={step.key} />
+                      {index < all.length - 1 && (
+                        <span aria-hidden className="text-slate-300">
+                          →
+                        </span>
+                      )}
+                    </span>
+                  ))}
+              </div>
+            </div>
           ))}
         </div>
-        <p className="mt-3 text-sm text-slate-600">
+        <p className="mt-4 text-sm text-slate-600">
           You are emailed at every step. If anything is missing from your packet
           we say exactly what it is, and you can upload it from your status page
           without starting over.
@@ -217,13 +232,13 @@ async function RepLanding({ actor }: { actor: ActingUser }) {
       </div>
 
       <div className="mt-4 card card-pad">
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {STATUSES.map((status) => (
-            <div key={status} className="rounded-lg bg-slate-50 px-3 py-3">
+        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {PIPELINES.EMPLOYEE.map((step) => (
+            <div key={step.key} className="rounded-lg bg-slate-50 px-3 py-3">
               <p className="text-2xl font-semibold text-slate-900">
-                {counts.get(status) ?? 0}
+                {counts.get(step.key) ?? 0}
               </p>
-              <p className="mt-1 text-xs text-slate-500">{statusLabel(status)}</p>
+              <p className="mt-1 text-xs text-slate-500">{step.label}</p>
             </div>
           ))}
         </div>
@@ -264,11 +279,11 @@ async function AdminLanding() {
   const [total, byType, byStatus, documents] = await Promise.all([
     prisma.enrollment.count(),
     prisma.enrollment.groupBy({ by: ["type"], _count: { _all: true } }),
-    prisma.enrollment.groupBy({ by: ["status"], _count: { _all: true } }),
+    prisma.enrollment.groupBy({ by: ["legacyStatus"], _count: { _all: true } }),
     prisma.document.count(),
   ]);
 
-  const statusCounts = new Map(byStatus.map((row) => [row.status, row._count._all]));
+  const statusCounts = new Map(byStatus.map((row) => [row.legacyStatus, row._count._all]));
   const typeCounts = new Map(byType.map((row) => [row.type, row._count._all]));
 
   return (
@@ -286,23 +301,25 @@ async function AdminLanding() {
       <section className="mt-10 card card-pad">
         <h2 className="section-title">Pipeline</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {STATUSES.map((status) => (
+          {LEGACY_STATUSES.map((stage) => (
             <Link
-              key={status}
-              href={`/admin?status=${status}`}
+              key={stage}
+              href={`/admin?stage=${stage}`}
               className="rounded-lg bg-slate-50 px-3 py-3 hover:bg-slate-100 transition"
             >
               <p className="text-2xl font-semibold text-slate-900">
-                {statusCounts.get(status) ?? 0}
+                {statusCounts.get(stage) ?? 0}
               </p>
-              <p className="mt-1 text-xs text-slate-500">{statusLabel(status)}</p>
+              <p className="mt-1 text-xs text-slate-500">{LEGACY_LABELS[stage]}</p>
             </Link>
           ))}
         </div>
         <p className="mt-4 text-sm text-slate-600">
-          Every transition is stored with its timestamp, the staff member who made
-          it, and a note — so the existing enrollment dashboard can query how long
-          records sit at each step.
+          Rolled up into the six stages the existing dashboard reads. Each enrollee
+          type runs its own pipeline underneath — employees through fingerprints
+          and Good to Go, participants through the PA in GAMMIS to Good to Serve.
+          Every transition is stored with both vocabularies, its timestamp, the
+          staff member who made it, and a note.
         </p>
       </section>
 

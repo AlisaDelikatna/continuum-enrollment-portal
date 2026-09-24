@@ -4,7 +4,7 @@ import { AdminFilters } from "@/components/AdminFilters";
 import { DigestButton } from "@/components/DigestButton";
 import { StatusBadge } from "@/components/StatusBadge";
 import { typeLabel } from "@/config/programs";
-import { STATUSES, statusLabel } from "@/config/statuses";
+import { LEGACY_LABELS, LEGACY_STATUSES } from "@/config/statuses";
 import { prisma } from "@/lib/db";
 import { dayBounds } from "@/lib/email";
 import { documentProgress, formatDate, programCodes, programList } from "@/lib/enrollments";
@@ -39,12 +39,14 @@ export default async function AdminPage(props: PageProps<"/admin">) {
     type: one(raw.type),
     program: one(raw.program),
     status: one(raw.status),
+    stage: one(raw.stage),
     q: one(raw.q),
   };
   const where = {
     ...(filters.type ? { type: filters.type } : {}),
     ...(filters.program ? { programs: { some: { program: filters.program } } } : {}),
     ...(filters.status ? { status: filters.status } : {}),
+    ...(filters.stage ? { legacyStatus: filters.stage } : {}),
     ...(filters.q
       ? {
           OR: [
@@ -72,11 +74,11 @@ export default async function AdminPage(props: PageProps<"/admin">) {
       },
     }),
     prisma.enrollment.count(),
-    prisma.enrollment.groupBy({ by: ["status"], _count: { _all: true } }),
+    prisma.enrollment.groupBy({ by: ["legacyStatus"], _count: { _all: true } }),
     prisma.document.count({ where: { createdAt: { gte: start, lt: end } } }),
   ]);
 
-  const counts = new Map(byStatus.map((row) => [row.status, row._count._all]));
+  const counts = new Map(byStatus.map((row) => [row.legacyStatus, row._count._all]));
   const todayValue = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(
     start.getDate(),
   ).padStart(2, "0")}`;
@@ -98,19 +100,26 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {STATUSES.map((status) => (
-          <Link
-            key={status}
-            href={`/admin?status=${status}`}
-            className="card px-4 py-3 hover:ring-brand-300 transition"
-          >
-            <p className="text-2xl font-semibold text-slate-900">
-              {counts.get(status) ?? 0}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">{statusLabel(status)}</p>
-          </Link>
-        ))}
+      <div>
+        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {LEGACY_STATUSES.map((stage) => (
+            <Link
+              key={stage}
+              href={`/admin?stage=${stage}`}
+              className="card px-4 py-3 hover:ring-brand-300 transition"
+            >
+              <p className="text-2xl font-semibold text-slate-900">
+                {counts.get(stage) ?? 0}
+              </p>
+              <p className="mt-1 text-xs text-slate-500">{LEGACY_LABELS[stage]}</p>
+            </Link>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-slate-500">
+          Rolled up into the six dashboard stages. Employees, participants and
+          vendors each run their own pipeline underneath — filter by status below
+          to see the real steps.
+        </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { ENROLLEE_TYPES, PROGRAMS, TYPE_LABELS } from "@/config/programs";
-import { STATUSES, statusLabel } from "@/config/statuses";
+import { PIPELINES } from "@/config/statuses";
 
 /** Type / program / status / search filters, kept in the URL so views are shareable. */
 export function AdminFilters({ total, shown }: { total: number; shown: number }) {
@@ -18,7 +18,9 @@ export function AdminFilters({ total, shown }: { total: number; shown: number })
     startTransition(() => router.push(`/admin?${next.toString()}`));
   };
 
-  const filtered = ["type", "program", "status", "q"].some((key) => params.get(key));
+  const filtered = ["type", "program", "status", "stage", "q"].some((key) =>
+    params.get(key),
+  );
 
   return (
     <div className="card card-pad">
@@ -72,10 +74,14 @@ export function AdminFilters({ total, shown }: { total: number; shown: number })
             onChange={(e) => update("status", e.target.value)}
           >
             <option value="">All statuses</option>
-            {STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {statusLabel(status)}
-              </option>
+            {ENROLLEE_TYPES.map((type) => (
+              <optgroup key={type} label={`${TYPE_LABELS[type]} pipeline`}>
+                {PIPELINES[type].map((step) => (
+                  <option key={`${type}-${step.key}`} value={step.key}>
+                    {step.label}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </div>

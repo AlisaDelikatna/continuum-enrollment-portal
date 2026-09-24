@@ -38,8 +38,11 @@ model Enrollment {
   id          String   @id @default(cuid())
   /// EMPLOYEE | VENDOR | PARTICIPANT
   type        String
-  /// RECEIVED | ACKNOWLEDGED | IN_REVIEW | MISSING_INFO | PROCESSED | ACTIVE
-  status      String   @default("RECEIVED")
+  /// Pipeline status for this enrollee type — see src/config/statuses.ts.
+  status       String  @default("PACKET_SENT")
+  /// The same state expressed in the original six-status vocabulary, kept so
+  /// the existing enrollment dashboard keeps working unchanged.
+  legacyStatus String  @default("RECEIVED")
 
   // Common contact fields captured on every form.
   name        String
@@ -75,6 +78,7 @@ model Enrollment {
 
   @@index([type])
   @@index([status])
+  @@index([legacyStatus])
   @@index([repId])
 }
 
@@ -98,7 +102,9 @@ model StatusEvent {
   enrollmentId String
   enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
 
-  status    String
+  status       String
+  /// Legacy bucket for this transition, for the existing dashboard.
+  legacyStatus String  @default("RECEIVED")
   note      String?
   changedById String?
   changedBy   User?   @relation(fields: [changedById], references: [id])
@@ -106,6 +112,7 @@ model StatusEvent {
 
   @@index([enrollmentId, createdAt])
   @@index([status, createdAt])
+  @@index([legacyStatus, createdAt])
   @@index([createdAt])
 }
 

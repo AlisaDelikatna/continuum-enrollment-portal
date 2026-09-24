@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { allDocumentsFor, documentLabel, OTHER_DOCUMENT } from "@/config/documents";
 import { REQUIRE_COMPLETE_ENROLLMENT_FORM } from "@/config/demo";
 import { ENROLLEE_TYPES, PROGRAMS, type EnrolleeType } from "@/config/programs";
-import { isStatus, statusLabel } from "@/config/statuses";
+import { INITIAL_STATUS, isStatusFor, legacyOf, statusLabel } from "@/config/statuses";
 import { prisma } from "./db";
 import { sendDailyDigest, sendEnrollmentReceivedEmail, sendStatusChangeEmail } from "./email";
 import { nextRefId } from "./enrollments";
@@ -101,7 +101,8 @@ export async function createEnrollment(input: EnrollmentInput): Promise<CreatedE
       refId,
       type,
       programs: { create: programs.map((program) => ({ program })) },
-      status: "RECEIVED",
+      status: INITIAL_STATUS,
+      legacyStatus: legacyOf(INITIAL_STATUS),
       name,
       email,
       phone: input.phone?.trim() || null,
@@ -115,8 +116,9 @@ export async function createEnrollment(input: EnrollmentInput): Promise<CreatedE
       repId: type === "EMPLOYEE" ? existingRep?.id ?? null : null,
       statusEvents: {
         create: {
-          status: "RECEIVED",
-          note: "Enrollment submitted through the public portal.",
+          status: INITIAL_STATUS,
+          legacyStatus: legacyOf(INITIAL_STATUS),
+          note: "Enrollment submitted through the public portal. Blank packet issued.",
           changedById: enrollee.id,
         },
       },
@@ -262,7 +264,17 @@ export async function changeStatus(_prev: ActionState, formData: FormData): Prom
     const status = String(formData.get("status") ?? "");
     const note = String(formData.get("note") ?? "").trim();
 
-    if (!isStatus(status)) return { ok: false, message: "Pick a valid status." };
+    const enrollment = await prisma.enrollment.findUnique({
+      where: { id: enrollmentId },
+      select: { type: true },
+    });
+    if (!enrollment) return { ok: false, message: "Enrollment not found." };
+
+    // Each enrollee type has its own pipeline, so a status only counts if it
+    // belongs to this record's type.
+    if (!isStatusFor(enrollment.type, status)) {
+      return { ok: false, message: "That status is not part of this pipeline." };
+    }
     if (status === "MISSING_INFO" && !note) {
       return {
         ok: false,
@@ -270,10 +282,21 @@ export async function changeStatus(_prev: ActionState, formData: FormData): Prom
       };
     }
 
+    const legacyStatus = legacyOf(status);
+
     await prisma.$transaction([
-      prisma.enrollment.update({ where: { id: enrollmentId }, data: { status } }),
+      prisma.enrollment.update({
+        where: { id: enrollmentId },
+        data: { status, legacyStatus },
+      }),
       prisma.statusEvent.create({
-        data: { enrollmentId, status, note: note || null, changedById: actor.id },
+        data: {
+          enrollmentId,
+          status,
+          legacyStatus,
+          note: note || null,
+          changedById: actor.id,
+        },
       }),
     ]);
 
