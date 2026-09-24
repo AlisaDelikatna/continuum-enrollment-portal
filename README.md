@@ -51,41 +51,54 @@ Submitting a new enrollment automatically signs you in as that new enrollee.
 
 ## Demo walkthrough (about five minutes)
 
+Verified end to end against the seeded data.
+
 1. **Enroll as a new employee** — go to `/enroll`.
-   - Step 1: pick **Employee**.
-   - Step 2: fill in the form. Tick **more than one waiver program** — an
-     enrollee can be enrolled under several. In *Representative email* type
-     `priya.raman@continuumfiscal.example` — an existing rep, so the new record
-     is linked to her automatically.
-   - Step 3: attach a file to one or two slots, or press **Skip for now**.
-   - The confirmation screen shows the enrollment ID (`CFS-EMP-00xx`) and the
-     status **Received**. You are now signed in as that employee; `/me` shows
-     their timeline and remaining documents.
+   - Step 1: pick **Employee**. The *"Not sure whether a caregiver is an employee
+     or a vendor?"* panel below the cards is the comparison agents give on every
+     caregiver call.
+   - Step 2: nothing is required, so you can click straight through if you want.
+     To make the rest of the walkthrough work, fill in a name and email, tick
+     **two waiver programs** (say COMP and ICWP), set a relationship, and put
+     `priya.raman@continuumfiscal.example` in *Representative email* — she is a
+     seeded rep, so the record links to her automatically.
+   - Step 3 opens with **Your forms**: the real Continuum packets for that
+     enrollee type, tagged complete-and-return, example-only or
+     keep-for-reference. Below them, one upload slot per form in the packet.
+     Attach one or press **Skip for now**.
+   - The confirmation screen shows the enrollment ID and the status **Received**.
+     You are now signed in as that employee, so `/me` shows their timeline, the
+     blank forms again, and everything still outstanding.
 
 2. **Upload a document as the rep** — switch **Acting as** to *Priya Raman*.
-   `/rep` lists only her employees, with a status badge and an "n of m documents"
-   count each. Open the new employee and upload a file on their behalf. Her name
-   is recorded as the uploader. No email is sent — by design.
+   `/rep` lists only her employees. Open the new one and upload on their behalf;
+   her name is recorded as the uploader. No email is sent — by design. With COMP
+   and ICWP selected the checklist shows 12 required documents.
 
 3. **Change status as admin** — switch to *Renee Calloway* and open the same
-   record from `/admin`. Choose **Missing info**, write a note saying exactly
-   what is outstanding, and save. The note is required for this status.
+   record from `/admin`. Choose **Missing info** and write a note saying exactly
+   what is outstanding. The note is required for that status, and the save
+   confirms who was notified.
 
-4. **See both emails** — go to `/outbox`. The status-change message is addressed
-   to the employee **and** to Priya, and the missing-info note appears in the
-   body under *WHAT WE STILL NEED*. The enrollee sees the same note in an amber
-   banner at the top of `/me`.
+4. **See both emails** — go to `/outbox` (admin-only). The status-change message
+   is addressed to the employee **and** to Priya, with the note under *WHAT WE
+   STILL NEED*. The enrollee sees the same note in an amber banner on `/me`.
 
-5. **Send the daily upload digest** — back on `/admin`, use the **Daily upload
-   digest** panel and press **Send today's digest**. One email to admin staff
-   lists every document uploaded that day — enrollee, type, document name and
-   who uploaded it. The date field is editable, so you can send a digest for any
-   past day too.
+5. **Send the daily upload digest** — back on `/admin`, press **Send today's
+   digest**. One email to admin staff listing every document uploaded that day:
+   enrollee, type, document name and who uploaded it. The date is editable, so
+   you can send a digest for any past day.
 
-Other things worth showing: the filters on `/admin` (type, program, status,
-search) which live in the URL; rep reassignment on the admin detail page; and
-the status history panel, which never overwrites — every transition is its own
-timestamped row.
+Other things worth showing:
+
+- the amber **Unconfirmed** tags on the checklist — requirements where the
+  packet and the call notes disagree, surfaced rather than quietly resolved
+- program-conditional requirements: a CCSP participant is asked for the CCSP
+  Cost Share Agreement, a COMP participant is not
+- `/admin` filters (type, program, status, search), which live in the URL
+- rep reassignment on the admin detail page
+- the status history panel, which never overwrites — every transition is its
+  own timestamped row
 
 ---
 
