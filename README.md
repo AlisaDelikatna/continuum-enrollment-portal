@@ -181,12 +181,36 @@ Two steps carry the constraints that actually block records:
   authorisation must be live before any of it can be billed; EVV visits logged
   before the PA lands will reject.
 
-Upstream prerequisites for COMP/NOW that sit before this packet and are not
-collected in the portal: complete PD training, sign the PD MOU and notify
-support coordination, choose a fiscal intermediary, and decide which services
-are participant-directed rather than traditional. The training certificate is
-valid for **90 days** and must fall within 90 days of the Request for Clinical
-Review.
+### Prerequisite order for a COMP/NOW participant
+
+Steps 1 and 5 appear on no printed checklist (Shavauna Clark, 23 Sep 2026):
+
+1. **Confirm which waiver you are on** — with the support coordinator. Many
+   people do not know, and it decides whether step 2 applies at all. The
+   enrollment form prompts for this next to the waiver picker.
+2. **Complete PD training** and get the certificate — valid 90 days, and it must
+   fall within 90 days of the Request for Clinical Review.
+3. **Sign the PD MOU** and choose Continuum as the fiscal intermediary.
+4. **Submit the packet**, with the certificate.
+5. **The support coordinator submits the budget / ISP change**; the PA appears as
+   approved in IDD-Connects. Continuum cannot submit or speed this up — the
+   acknowledgement email tells participants to check it has been done.
+6. **Services start on the 1st of the month.**
+
+The training certificate applies to **COMP and NOW only** — not CCSP, SOURCE or
+ICWP, where the DBHDD participant-direction training does not exist.
+
+### Processing times
+
+| | |
+| --- | --- |
+| Complete participant packet | about two weeks |
+| Employee packet, end to end | three weeks to a month (fingerprinting sits in the middle) |
+| Background pre-approval | 24–48 hours outside payroll week |
+| Fingerprint results | usually within a week, occasionally up to three |
+
+These appear in the status descriptions staff see and in the enrollee-facing
+guidance, so nobody has to quote them from memory.
 
 Each status carries staff-facing `description` text, shown when an admin changes
 status, and some carry plain-language `guidance` shown to the enrollee and their

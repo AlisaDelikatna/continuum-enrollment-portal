@@ -102,8 +102,9 @@ export const PARTICIPANT_DOCUMENTS: RequiredDocument[] = [
   {
     key: "training-certificate",
     label: "Self-Directed Training Certificate (representative)",
-    hint: "The representative's certificate, sent with the paperwork. Issued by DBHDD after roughly 4–5 hours of virtual training. Valid for 90 days, and it must fall within 90 days of the Request for Clinical Review — an expired certificate means retaking the training and completing the whole current packet.",
+    hint: "COMP and NOW only — the DBHDD participant-direction training does not apply to CCSP, SOURCE or ICWP. The representative completes it before enrolling with a fiscal intermediary. Roughly 4–5 hours, virtual. Valid for 90 days, and it must fall within 90 days of the Request for Clinical Review; an expired certificate means retaking the training and completing the whole current packet.",
     required: true,
+    programs: ["COMP", "NOW"],
   },
   {
     key: "icd-10",

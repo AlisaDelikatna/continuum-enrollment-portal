@@ -150,7 +150,7 @@ export async function sendEnrollmentReceivedEmail(enrollmentId: string) {
     `Enrollment ID: ${enrollment.refId}`,
     `Current status: ${statusLabel("RECEIVED")}`,
     "",
-    "Packets are reviewed first-in, first-out — allow 24–48 business hours, longer during payroll week. You can upload any remaining documents at any time from your status page.",
+    ...processingLines(enrollment.type),
     ...packetLines(enrollment.type),
     "",
     `Status page: ${PORTAL_URL}/me`,
@@ -164,6 +164,29 @@ export async function sendEnrollmentReceivedEmail(enrollmentId: string) {
     kind: "ENROLLMENT_RECEIVED",
     enrollmentRef: enrollment.refId,
   });
+}
+
+/**
+ * How long this type takes, and — for participants — the reminder Shavauna
+ * asked for: the budget is the final gate and the support coordinator, not
+ * Continuum, submits it.
+ */
+function processingLines(type: string): string[] {
+  if (type === "PARTICIPANT") {
+    return [
+      "A complete participant packet takes about two weeks to process, first-in first-out.",
+      "",
+      "IMPORTANT — please check with your support coordinator that your budget (PA) has been submitted. It is the final gate on your enrollment, and it is not something Continuum can submit or speed up. Services start on the 1st of the month once it is approved.",
+    ];
+  }
+  if (type === "EMPLOYEE") {
+    return [
+      "An employee packet takes about three weeks to a month end to end, because fingerprinting sits in the middle. Background pre-approval runs 24–48 hours outside payroll week, and fingerprint results usually land within a week.",
+    ];
+  }
+  return [
+    "Packets are reviewed first-in, first-out — allow 24–48 business hours, longer during payroll week.",
+  ];
 }
 
 /**

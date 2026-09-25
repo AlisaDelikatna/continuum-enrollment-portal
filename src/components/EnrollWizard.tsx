@@ -189,6 +189,12 @@ export function EnrollWizard() {
                   select every program that applies
                 </span>
               </legend>
+              <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 ring-1 ring-inset ring-amber-200">
+                <strong>Not sure which waiver you are on?</strong> Ask your support
+                coordinator before you go further. It decides which documents we
+                need — the self-directed training certificate, for instance, applies
+                to COMP and NOW only.
+              </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 {PROGRAMS.map((program) => {
                   const checked = programs.includes(program);

@@ -66,6 +66,8 @@ const COMMON_INTAKE: StatusDef[] = [
     label: "Packet sent",
     description:
       "Enrollment submitted and the blank packet issued. Nothing has come back yet.",
+    guidance:
+      "We have your details and your forms are ready to print. Complete them and upload the pages here — there is no deadline, and you can do it in stages.",
     legacy: "RECEIVED",
   },
   {
@@ -78,7 +80,9 @@ const COMMON_INTAKE: StatusDef[] = [
     key: "IN_REVIEW",
     label: "In review",
     description:
-      "A specialist is checking the packet against the checklist. Allow 24–48 business hours, longer during payroll week.",
+      "A specialist is checking the packet against the checklist. Queued first-in, first-out; longer during payroll week. End to end a complete participant packet runs about two weeks, an employee packet three weeks to a month because of fingerprinting.",
+    guidance:
+      "We are checking your packet against the checklist. A complete participant packet takes about two weeks; an employee packet three weeks to a month, because fingerprinting sits in the middle. We will email you the moment anything is missing.",
     legacy: "IN_REVIEW",
   },
 ];
@@ -91,7 +95,9 @@ export const PIPELINES: Record<EnrolleeType, StatusDef[]> = {
       key: "FINGERPRINTS_PENDING",
       label: "Fingerprints pending",
       description:
-        "Packet complete. Fingerprint Instructions emailed to the employee with the rep copied — they create a Checkpoint account, submit the application and book an appointment.",
+        "Packet complete. Fingerprint Instructions emailed to the employee with the rep copied — they create a Checkpoint account, submit the application and book an appointment. Background pre-approval runs 24–48 hours outside payroll week; results usually land within a week, occasionally up to three.",
+      guidance:
+        "Your packet is complete and we have emailed you fingerprint instructions. Create your Checkpoint account, submit the application and book an appointment. Results usually come back within a week, occasionally up to three.",
       legacy: "PROCESSED",
     },
     {
