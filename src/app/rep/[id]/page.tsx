@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DocumentChecklist } from "@/components/DocumentChecklist";
 import { EnrollmentFacts } from "@/components/EnrollmentFacts";
+import { JourneyTracker } from "@/components/JourneyTracker";
 import { MissingInfoBanner } from "@/components/MissingInfoBanner";
 import { StatusBadge } from "@/components/StatusBadge";
 import { StatusProgress, StatusTimeline } from "@/components/StatusTimeline";
@@ -98,6 +99,18 @@ export default async function RepEmployeePage(props: PageProps<"/rep/[id]">) {
           by={missing.changedBy?.name}
         />
       )}
+
+      <div className="card card-pad">
+        <h2 className="section-title">How this enrollment works</h2>
+        <p className="mt-1 mb-5 text-sm text-slate-600">
+          Every step from start to finish, and whose move each one is.
+        </p>
+        <JourneyTracker
+          type={enrollment.type}
+          status={enrollment.status}
+          programs={codes}
+        />
+      </div>
 
       <div className="card card-pad">
         <h2 className="section-title mb-4">Employee details</h2>

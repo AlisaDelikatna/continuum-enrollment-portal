@@ -181,24 +181,37 @@ Two steps carry the constraints that actually block records:
   authorisation must be live before any of it can be billed; EVV visits logged
   before the PA lands will reject.
 
-### Prerequisite order for a COMP/NOW participant
+### The journey
 
-Steps 1 and 5 appear on no printed checklist (Shavauna Clark, 23 Sep 2026):
+`src/config/journey.ts` holds the end-to-end sequence per enrollee type —
+including the parts Continuum does not control — and `JourneyTracker` renders it
+on `/me` and the rep's view.
 
-1. **Confirm which waiver you are on** — with the support coordinator. Many
-   people do not know, and it decides whether step 2 applies at all. The
-   enrollment form prompts for this next to the waiver picker.
-2. **Complete PD training** and get the certificate — valid 90 days, and it must
-   fall within 90 days of the Request for Clinical Review.
-3. **Sign the PD MOU** and choose Continuum as the fiscal intermediary.
-4. **Submit the packet**, with the certificate.
-5. **The support coordinator submits the budget / ISP change**; the PA appears as
-   approved in IDD-Connects. Continuum cannot submit or speed this up — the
-   acknowledgement email tells participants to check it has been done.
-6. **Services start on the 1st of the month.**
+It is deliberately wider than the pipeline in `statuses.ts`. That pipeline is
+what *Continuum* does with a record; this is what the enrollee experiences, and
+it starts before they contact us.
 
-The training certificate applies to **COMP and NOW only** — not CCSP, SOURCE or
-ICWP, where the DBHDD participant-direction training does not exist.
+**Participant** (corrected by Shavauna Clark, 23–24 Sep 2026):
+
+1. **Confirm which waiver you are on** — with the support coordinator. Comes
+   before everything, because it decides whether step 2 applies. On no printed
+   checklist; the enrollment form now prompts for it beside the waiver picker.
+2. **Complete the self-directed training** — COMP and NOW only. Certificate
+   valid 90 days, goes in the packet. CCSP, SOURCE and ICWP skip it entirely.
+3. **Submit the packet.** Enrollment proceeds *without* the budget — the two run
+   in parallel, which the tracker says explicitly.
+4. **The support coordinator submits the budget (PA)**; it shows as approved in
+   IDD-Connects. Continuum checks weekly and can neither submit it nor speed it
+   up. Also on no printed checklist.
+5. **Services and billing start** once enrollment is complete and the PA is
+   live — the 1st of the month for NOW and COMP.
+
+Every step carries an owner — **Your step**, **Support coordinator** or
+**Continuum**. That is the call-deflection mechanism: "why is this taking so
+long" is usually a step nobody told the caller was someone else's to make. Steps
+that do not apply to a waiver stay visible and greyed with *"Not required for
+your waiver"*, rather than being hidden, because people ask whether the training
+applies to them and an absent row does not answer that.
 
 ### Processing times
 
