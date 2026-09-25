@@ -12,6 +12,7 @@ import {
   PROGRAMS,
   TYPE_BLURBS,
   TYPE_LABELS,
+  WAIVER_PROMPTS,
   type EnrolleeType,
 } from "@/config/programs";
 import { createEnrollment, uploadDocuments, type CreatedEnrollment } from "@/lib/actions";
@@ -190,10 +191,11 @@ export function EnrollWizard() {
                 </span>
               </legend>
               <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 ring-1 ring-inset ring-amber-200">
-                <strong>Not sure which waiver you are on?</strong> Ask your support
-                coordinator before you go further. It decides which documents we
-                need — the self-directed training certificate, for instance, applies
-                to COMP and NOW only.
+                <strong>Not sure which waiver you are on?</strong>{" "}
+                {type === "PARTICIPANT"
+                  ? "Ask your support coordinator before you go further. "
+                  : ""}
+                {WAIVER_PROMPTS[type]}
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 {PROGRAMS.map((program) => {

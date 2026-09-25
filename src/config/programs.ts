@@ -64,3 +64,17 @@ export const EMPLOYEE_VS_VENDOR: Array<{ aspect: string; employee: string; vendo
 export function typeLabel(type: string): string {
   return TYPE_LABELS[type as EnrolleeType] ?? type;
 }
+
+/**
+ * Why the waiver matters, per enrollee type. Shown beside the waiver picker.
+ * Shavauna's point (23 Sep 2026) was that many people do not know which waiver
+ * they are on — but what turns on it differs, so the prompt has to as well.
+ */
+export const WAIVER_PROMPTS: Record<EnrolleeType, string> = {
+  PARTICIPANT:
+    "It decides which documents we need — the self-directed training certificate applies to COMP and NOW only, and the cost share agreement to CCSP only.",
+  EMPLOYEE:
+    "Your documents are the same either way, but the waiver sets your service codes, your rate and whether EVV applies. If you are unsure, ask the participant or their representative.",
+  VENDOR:
+    "The service has to sit on the participant's budget under a code Continuum is authorised for, and that depends on the waiver.",
+};
