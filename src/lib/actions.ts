@@ -11,6 +11,7 @@ import { sendDailyDigest, sendEnrollmentReceivedEmail, sendStatusChangeEmail } f
 import { nextRefId } from "./enrollments";
 import { ACTING_USER_COOKIE, getActingUser } from "./session";
 import { saveUpload } from "./storage";
+import { describeSize, MAX_UPLOAD_LABEL, tooLarge } from "@/config/uploads";
 
 /* ---------------------------------------------------------------- */
 /* Role switcher                                                     */
@@ -201,6 +202,20 @@ export async function uploadDocuments(
 
   if (pairs.length === 0) {
     return { ok: false, uploaded: 0, message: "Choose at least one file first." };
+  }
+
+  // Enforced here as well as in the browser: the client check is a courtesy,
+  // this one is the rule.
+  const oversized = pairs.filter(({ file }) => tooLarge(file.size));
+  if (oversized.length > 0) {
+    const names = oversized
+      .map(({ file }) => `${file.name} (${describeSize(file.size)})`)
+      .join(", ");
+    return {
+      ok: false,
+      uploaded: 0,
+      message: `Too large to upload: ${names}. The limit is ${MAX_UPLOAD_LABEL} per file — try scanning in black and white, or at a lower resolution.`,
+    };
   }
 
   const known = new Set([

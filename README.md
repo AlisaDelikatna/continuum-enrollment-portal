@@ -405,7 +405,12 @@ or vendor correspondence.
   rep cannot open another rep's employee or upload on their behalf — but that
   check is only as strong as the cookie.
 - `/api/documents/[id]` serves any uploaded file to anyone who has the id.
-- Uploads are not scanned, size-limited or type-restricted.
+- Uploads are capped at 25 MB per file and 30 MB per submission
+  (`src/config/uploads.ts`), but are not virus-scanned or type-restricted.
+  Server Actions cap the whole request body at 1 MB by default, which rejected
+  ordinary scans outright; `next.config.ts` raises it to 32 MB, deliberately
+  above the app's own ceiling so an oversized file gets a readable message
+  instead of a framework error page.
 - Sending email is stubbed entirely; wiring a real provider means replacing the
   `queue()` function in `src/lib/email.ts`.
 - No pagination on the admin table — fine at 25 records, not at 25,000.

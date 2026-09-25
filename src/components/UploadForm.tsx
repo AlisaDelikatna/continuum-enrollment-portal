@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { OTHER_DOCUMENT, type RequiredDocument } from "@/config/documents";
 import { uploadDocuments } from "@/lib/actions";
+import { describeSize, MAX_UPLOAD_LABEL, tooLarge } from "@/config/uploads";
 
 /**
  * Single-slot upload used on /me, /rep/[id] and /admin/[id].
@@ -32,6 +33,16 @@ export function UploadForm({
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         setResult(null);
+
+        const chosen = data.get("file");
+        if (chosen instanceof File && tooLarge(chosen.size)) {
+          setResult({
+            ok: false,
+            message: `${chosen.name} is ${describeSize(chosen.size)} — the limit is ${MAX_UPLOAD_LABEL} per file. Try scanning in black and white, or at a lower resolution.`,
+          });
+          return;
+        }
+
         startTransition(async () => {
           const response = await uploadDocuments(data);
           setResult(response);
@@ -72,6 +83,9 @@ export function UploadForm({
               file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-700
               hover:file:bg-slate-200"
           />
+          <p className="mt-1 text-xs text-slate-500">
+            PDF, photo or scan, up to {MAX_UPLOAD_LABEL}.
+          </p>
         </div>
       </div>
 

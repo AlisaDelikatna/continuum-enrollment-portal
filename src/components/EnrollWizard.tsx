@@ -16,6 +16,12 @@ import {
   type EnrolleeType,
 } from "@/config/programs";
 import { createEnrollment, uploadDocuments, type CreatedEnrollment } from "@/lib/actions";
+import {
+  describeSize,
+  MAX_UPLOAD_LABEL,
+  MAX_UPLOAD_TOTAL_BYTES,
+  tooLarge,
+} from "@/config/uploads";
 import { PacketDownloads } from "./PacketDownloads";
 import { StatusBadge } from "./StatusBadge";
 
@@ -329,7 +335,8 @@ export function EnrollWizard() {
             Upload completed documents
           </h3>
           <p className="mt-1 text-sm text-slate-600">
-            Nothing here is required to finish — you can come back later.
+            Nothing here is required to finish — you can come back later. PDFs,
+            photos or scans, up to {MAX_UPLOAD_LABEL} each.
           </p>
 
           <form
@@ -338,6 +345,27 @@ export function EnrollWizard() {
               event.preventDefault();
               const data = new FormData(event.currentTarget);
               setError(null);
+
+              const files = [...data.values()].filter(
+                (v): v is File => v instanceof File && v.size > 0,
+              );
+              const oversized = files.filter((f) => tooLarge(f.size));
+              if (oversized.length > 0) {
+                setError(
+                  `Too large to upload: ${oversized
+                    .map((f) => `${f.name} (${describeSize(f.size)})`)
+                    .join(", ")}. The limit is ${MAX_UPLOAD_LABEL} per file.`,
+                );
+                return;
+              }
+              const total = files.reduce((sum, f) => sum + f.size, 0);
+              if (total > MAX_UPLOAD_TOTAL_BYTES) {
+                setError(
+                  `That is ${describeSize(total)} in one go, which is more than we can take at once. Upload a few at a time — the rest can wait for your status page.`,
+                );
+                return;
+              }
+
               startTransition(async () => {
                 const response = await uploadDocuments(data);
                 if (!response.ok && response.uploaded === 0) {
