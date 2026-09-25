@@ -102,7 +102,7 @@ export const PARTICIPANT_DOCUMENTS: RequiredDocument[] = [
   {
     key: "training-certificate",
     label: "Self-Directed Training Certificate (representative)",
-    hint: "The representative's certificate, sent with the paperwork. Issued by DBHDD after roughly 4–5 hours of virtual training. A certificate from a previous year is not accepted — the representative must retake the training and complete the whole current packet.",
+    hint: "The representative's certificate, sent with the paperwork. Issued by DBHDD after roughly 4–5 hours of virtual training. Valid for 90 days, and it must fall within 90 days of the Request for Clinical Review — an expired certificate means retaking the training and completing the whole current packet.",
     required: true,
   },
   {

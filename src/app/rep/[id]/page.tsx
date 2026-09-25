@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { StatusProgress, StatusTimeline } from "@/components/StatusTimeline";
 import { UploadForm } from "@/components/UploadForm";
 import { documentsFor } from "@/config/documents";
+import { statusGuidance } from "@/config/statuses";
 import { prisma } from "@/lib/db";
 import { documentProgress, programCodes, programList } from "@/lib/enrollments";
 import { getActingUser } from "@/lib/session";
@@ -83,6 +84,11 @@ export default async function RepEmployeePage(props: PageProps<"/rep/[id]">) {
 
       <div className="card card-pad">
         <StatusProgress current={enrollment.status} type={enrollment.type} />
+        {statusGuidance(enrollment.status) && (
+          <p className="mt-4 border-t border-slate-100 pt-4 text-sm text-slate-600">
+            {statusGuidance(enrollment.status)}
+          </p>
+        )}
       </div>
 
       {missing?.note && (

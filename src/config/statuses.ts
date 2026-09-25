@@ -42,6 +42,8 @@ export type StatusDef = {
   label: string;
   /** What this step means operationally. Shown as help text to admin staff. */
   description: string;
+  /** Plain-language version shown to the enrollee on their own status page. */
+  guidance?: string;
   legacy: LegacyStatus;
   /** A hold, not a forward step — kept off the linear progress strip. */
   hold?: boolean;
@@ -52,6 +54,8 @@ const MISSING_INFO: StatusDef = {
   label: "Missing info",
   description:
     "On hold pending items from the enrollee. The note must say exactly what is outstanding.",
+  guidance:
+    "We need a few more things before we can continue. The details are in the note above — upload them below and your enrollment goes back into review.",
   legacy: "MISSING_INFO",
   hold: true,
 };
@@ -101,7 +105,9 @@ export const PIPELINES: Record<EnrolleeType, StatusDef[]> = {
       key: "GOOD_TO_GO",
       label: "Good to go",
       description:
-        "Portal credentials issued. Only now may the employee work, use EVV, enter time or be paid.",
+        "Portal credentials issued. Only now may the employee work, use EVV, enter time or be paid. Separately: the participant's authorisation must also be live before any of it can be billed — EVV visits logged before the PA lands will reject.",
+      guidance:
+        "You are cleared to work. Your portal login has been sent. If your participant's authorisation is not yet in place, hold off clocking in — visits logged before it lands are rejected.",
       legacy: "ACTIVE",
     },
   ],
@@ -111,16 +117,20 @@ export const PIPELINES: Record<EnrolleeType, StatusDef[]> = {
     MISSING_INFO,
     {
       key: "AWAITING_PA",
-      label: "Awaiting PA in GAMMIS",
+      label: "Awaiting authorisation",
       description:
-        "Paperwork is done; waiting on the support coordinator's prior authorisation to appear in GAMMIS. Continuum cannot load a PA from an email — do not promise a start date until it is visible. Allow up to about a week after the coordinator submits.",
+        "Enrollment here is complete — which is itself a prerequisite for the authorisation, so there is nothing to look up before this point. COMP/NOW: watch for the PA at 'approved' status in IDD-Connects, triggered by the support coordinator's ISP version change. CCSP/SOURCE: the care coordinator enters a SAF, which loads into GAMMIS as the PA. New enrollees can only start on the 1st of the month. Continuum cannot load a PA from an email and does not create PAs — if it has not appeared, the support coordinator or case manager is the first call. ICWP timing is unconfirmed.",
+      guidance:
+        "Your authorisation is created after your enrollment with us is complete and your support coordinator or case manager submits it. Services can start on the 1st of the following month. If it is not showing, your support coordinator or case manager is the first call.",
       legacy: "PROCESSED",
     },
     {
       key: "GOOD_TO_SERVE",
       label: "Good to serve",
       description:
-        "Notarized RD-1061, ICD-10 code, training certificate and an active PA all in place. Portal login sent; the budget appears on the Budget tab.",
+        "Notarized RD-1061, ICD-10 code, a training certificate still inside its 90 days, and an approved authorisation all in place. Portal login sent; the budget appears on the Budget tab.",
+      guidance:
+        "You are cleared. Your portal login has been sent, and your budget is on the Budget tab.",
       legacy: "ACTIVE",
     },
   ],
@@ -168,6 +178,11 @@ export function statusLabel(key: string): string {
 
 export function statusDescription(key: string): string {
   return statusDef(key)?.description ?? "";
+}
+
+/** Enrollee-facing copy for the current step, if there is any. */
+export function statusGuidance(key: string): string | null {
+  return statusDef(key)?.guidance ?? null;
 }
 
 /** The legacy bucket this status rolls up to, for the existing dashboard. */

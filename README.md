@@ -165,10 +165,32 @@ strip, which shows where the record stalled.
 
 Two steps carry the constraints that actually block records:
 
-- **Awaiting PA in GAMMIS** — Continuum cannot load a prior authorisation from
-  an email. No start date is promised until it is visible in GAMMIS.
-- **Fingerprints pending** — the employee cannot work, use EVV, enter time or
-  be paid until Good to go lands.
+- **Awaiting authorisation** — for a new enrollee the PA appears at the *end* of
+  the sequence, not the start. Enrolling with Continuum is itself one of the
+  prerequisites for it, so there is nothing to look up at intake.
+  - **COMP/NOW** — the PA shows at "approved" status in IDD-Connects, triggered
+    by the support coordinator's ISP version change
+  - **CCSP/SOURCE** — the care coordinator enters a SAF, which loads into
+    GAMMIS as the PA
+  - **ICWP** — timing unconfirmed; check with the case manager or waiver manual
+  - New enrollees can only start on the **1st of the month**. Continuum does not
+    create PAs and cannot load one from an email; if it has not appeared, the
+    support coordinator or case manager is the first call.
+- **Fingerprints pending / Good to go** — the employee cannot work, use EVV,
+  enter time or be paid until Good to go lands. Separately, the *participant's*
+  authorisation must be live before any of it can be billed; EVV visits logged
+  before the PA lands will reject.
+
+Upstream prerequisites for COMP/NOW that sit before this packet and are not
+collected in the portal: complete PD training, sign the PD MOU and notify
+support coordination, choose a fiscal intermediary, and decide which services
+are participant-directed rather than traditional. The training certificate is
+valid for **90 days** and must fall within 90 days of the Request for Clinical
+Review.
+
+Each status carries staff-facing `description` text, shown when an admin changes
+status, and some carry plain-language `guidance` shown to the enrollee and their
+rep on the status page.
 
 ### The existing dashboard keeps working
 
