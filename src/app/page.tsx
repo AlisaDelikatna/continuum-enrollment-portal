@@ -38,23 +38,14 @@ function Hero({ actor }: { actor: ActingUser | null }) {
       <h1 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
         Enrollment portal for Georgia self-directed waiver programs
       </h1>
-      <p className="mt-4 text-base text-slate-600">
-        One intake path for employees, vendors and participants across COMP, NOW,
-        CCSP, SOURCE and ICWP — with a timestamped status history behind every
-        record, documents in one place, and every notification captured for review.
-      </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <Link href="/enroll" className="btn-primary">
           Start an enrollment
         </Link>
-        {actor ? (
+        {actor && (
           <Link href={workspace} className="btn-secondary">
             Continue as {actor.name}
           </Link>
-        ) : (
-          <span className="self-center text-sm text-slate-500">
-            Already enrolled? Pick your name in the header to sign in.
-          </span>
         )}
       </div>
     </div>
