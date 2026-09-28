@@ -14,8 +14,9 @@ import { programList } from "./enrollments";
 const ENROLLMENT_INBOX = "enrollments@continuumfs.com";
 const PHONE = "678-974-7942";
 
-// PLACEHOLDER — the real portal URL was never given in the source notes.
-const PORTAL_URL = "https://portal.continuumfs.com";
+// From the Continuum Call Center KB (493 calls, Sep 1–22 2026): the portal is
+// cfsportal.continuumfs.com, usernames firstname.lastname in lowercase.
+const PORTAL_URL = "https://cfsportal.continuumfs.com";
 
 type QueueArgs = {
   to: string[];

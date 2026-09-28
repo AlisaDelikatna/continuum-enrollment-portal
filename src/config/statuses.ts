@@ -95,9 +95,9 @@ export const PIPELINES: Record<EnrolleeType, StatusDef[]> = {
       key: "FINGERPRINTS_PENDING",
       label: "Fingerprints pending",
       description:
-        "Packet complete. Fingerprint Instructions emailed to the employee with the rep copied — they create a Checkpoint account, submit the application and book an appointment. Background pre-approval runs 24–48 hours outside payroll week; results usually land within a week, occasionally up to three.",
+        "Packet complete. Fingerprint Instructions emailed to the employee with the rep copied — they create a Checkpoint account, submit the application and book an appointment. Only the state process launched from those instructions counts; prints taken elsewhere do not, and one set covers one participant. Background pre-approval runs 24–48 hours outside payroll week; results usually land within a week, occasionally up to three.",
       guidance:
-        "Your packet is complete and we have emailed you fingerprint instructions. Create your Checkpoint account, submit the application and book an appointment. Results usually come back within a week, occasionally up to three.",
+        "Your packet is complete and we have emailed you fingerprint instructions. Use those instructions — prints taken anywhere else do not count, and you would have to do them again. Create your account, submit the application and book an appointment. Results usually come back within a week, occasionally up to three.",
       legacy: "PROCESSED",
     },
     {

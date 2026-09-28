@@ -334,7 +334,7 @@ counts.
 | ~~`enrollment@` vs `enrollments@`~~ | **Resolved: `enrollments@continuumfs.com`** (plural), per the Continuum signature block in two of Shavauna's emails, 30 Jul and 26 Aug 2026 |
 | Fingerprint fee reimbursement — receipts to `invoices@`, ~10 business days by money order | not modelled; no reimbursement flow exists yet |
 | ~~Program scope~~ | **Resolved: all five.** The Participant/Representative Agreement offers COMP, NOW, CCSP, ICWP and SOURCE as checkboxes, and the Employee Rate Form lists a SOURCE service line |
-| Portal URL in emails | `https://portal.continuumfs.com` is a **placeholder** — the real URL was never given |
+| ~~Portal URL in emails~~ | **Resolved: `cfsportal.continuumfs.com`**, from the Continuum Call Center KB |
 
 Not modelled at all: the Checkpoint fingerprint flow and the Good to Go email,
 the family-hire approval and yearly renewal cycle (including the time-entry lock
